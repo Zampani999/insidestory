@@ -49,22 +49,23 @@
     }
 
     // Timeline items — IntersectionObserver slide-in animation
-    // Works on all devices (mobile included) unlike GSAP ScrollTrigger
+    // Observes the timeline panel container, then staggers each item's reveal
+    const timelinePanel = document.querySelector('.timeline-panel');
     const tlItems = document.querySelectorAll('.tl-item');
-    if (tlItems.length > 0 && 'IntersectionObserver' in window) {
+    if (timelinePanel && tlItems.length > 0 && 'IntersectionObserver' in window) {
         const observer = new IntersectionObserver((entries) => {
             entries.forEach((entry) => {
                 if (entry.isIntersecting) {
-                    const item = entry.target;
-                    const index = parseInt(item.getAttribute('data-tl') || '1', 10) - 1;
-                    setTimeout(() => {
-                        item.classList.add('visible');
-                    }, index * 150); // staggered 150ms delay
-                    observer.unobserve(item);
+                    tlItems.forEach((item, i) => {
+                        setTimeout(() => {
+                            item.classList.add('visible');
+                        }, i * 250); // 250ms stagger per item
+                    });
+                    observer.unobserve(entry.target);
                 }
             });
-        }, { threshold: 0.2 });
+        }, { threshold: 0.15 });
 
-        tlItems.forEach(item => observer.observe(item));
+        observer.observe(timelinePanel);
     }
 })();
