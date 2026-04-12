@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Insidestory — Sliding Door Experience</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.2/lib/anime.min.js"></script>
+    <style>
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #08080a;
+            --text: #f5f0eb;
+            --accent: #c9a96e;
+            --accent2: #d4a0a0;
+            --muted: #6a655f;
+            --blueprint: rgba(201, 169, 110, 0.25);
+            --font-head: 'Playfair Display', serif;
+            --font-body: 'Inter', sans-serif;
+            --font-accent: 'Cormorant Garamond', serif;
+        }
+
+        html,
+        body {
+            height: 100%;
+            font-family: var(--font-body);
+            background: var(--bg);
+            color: var(--text);
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+            cursor: none;
+        }
+
+        /* ── CUSTOM CURSOR ── */
+        .cursor-dot {
+            position: fixed;
+            width: 5px;
+            height: 5px;
+            background: var(--accent);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+        }
+
+        .cursor-ring {
+            position: fixed;
+            width: 35px;
+            height: 35px;
+            border: 1px solid rgba(201, 169, 110, 0.4);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9998;
+            transform: translate(-50%, -50%);
+            transition: width 0.3s, height 0.3s, border-color 0.3s;
+        }
+
+        /* ── BACK LINK ── */
+        .back-link {
+            position: fixed;
+            top: 2rem;
+            left: 2rem;
+            z-index: 100;
+            font-size: 0.7rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--muted);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: color 0.3s;
+        }
+
+        .back-link:hover {
+            color: var(--accent);
+        }
+
+        .page-title {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            text-align: right;
+            z-index: 100;
+        }
+
+        .page-title-the {
+            display: block;
+            font-family: var(--font-accent);
+            font-size: 0.55rem;
+            letter-spacing: 0.35em;
+            text-transform: uppercase;
+            color: var(--accent);
+        }
+
+        .page-title-name {
+            font-family: var(--font-head);
+            font-size: 0.95rem;
+            font-weight: 400;
+        }
+
+        /* ── SCENE ── */
+        .scene {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            perspective: 1400px;
+            overflow: hidden;
+        }
+
+        /* ── PARTICLE CONTAINER ── */
+        .particles {
+            position: absolute;
+            inset: 0;
+            z-index: 60;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+            opacity: 0;
+        }
+
+        /* ── AMBIENT GLOW ── */
+        .ambient-glow {
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            top: -50%;
+            left: -50%;
+            background: radial-gradient(ellipse at 50% 50%,
+                    rgba(201, 169, 110, 0.0) 0%,
+                    rgba(201, 169, 110, 0.0) 30%,
+                    transparent 70%);
+            z-index: 0;
+            pointer-events: none;
+            transition: background 1.5s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+
+        .ambient-glow.active {
+            background: radial-gradient(ellipse at 50% 50%,
+                    rgba(201, 169, 110, 0.06) 0%,
+                    rgba(201, 169, 110, 0.03) 30%,
+                    transparent 70%);
+        }
+
+        /* ── ROOM BEHIND ── */
+        .room-behind {
+            position: absolute;
+            width: 62vw;
+            height: 75vh;
+            max-width: 900px;
+            background-image: url('images/room-behind-door.png');
+            background-size: cover;
+            background-position: center;
+            border-radius: 4px;
+            z-index: 1;
+            filter: brightness(0.3);
+            transition: filter 1.5s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+
+        .room-behind.revealed {
+            filter: brightness(1);
+        }
+
+        .room-behind::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at center, transparent 40%, rgba(0, 0, 0, 0.35) 100%);
+        }
+
+        /* ── SVG BLUEPRINT OVERLAY ── */
+        .blueprint-overlay {
+            position: absolute;
+            width: 62vw;
+            height: 75vh;
+            max-width: 900px;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .blueprint-overlay svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .bp-line {
+            fill: none;
+            stroke: var(--accent);
+            stroke-width: 1;
+            opacity: 0.5;
+        }
+
+        .bp-dim-line {
+            fill: none;
+            stroke: rgba(201, 169, 110, 0.3);
+            stroke-width: 0.5;
+            stroke-dasharray: 4 3;
+        }
+
+        .bp-text {
+            fill: var(--accent);
+            font-family: var(--font-body);
+            font-size: 8px;
+            letter-spacing: 2px;
+            opacity: 0.6;
+        }
+
+        .bp-annotation {
+            fill: none;
+            stroke: rgba(201, 169, 110, 0.4);
+            stroke-width: 0.5;
+        }
+
+        /* ── DOOR FRAME ── */
+        .door-frame {
+            position: relative;
+            width: 62vw;
+            height: 75vh;
+            max-width: 900px;
+            z-index: 10;
+            overflow: hidden;
+            border-radius: 4px;
+            transform-style: preserve-3d;
+        }
+
+        /* Track */
+        .door-track {
+            position: absolute;
+            top: 0;
+            left: -3%;
+            width: 106%;
+            height: 14px;
+            z-index: 30;
+            background: linear-gradient(180deg, #2a2a2a, #1e1e1e 40%, #333 50%, #1e1e1e);
+            border-radius: 3px 3px 0 0;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .door-track::before {
+            content: '';
+            position: absolute;
+            top: 5px;
+            left: 8%;
+            width: 84%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, rgba(201, 169, 110, 0.25), transparent);
+            border-radius: 1.5px;
+        }
+
+        /* Door panels */
+        .door-panel {
+            position: absolute;
+            top: 0;
+            width: 50%;
+            height: 100%;
+            will-change: transform;
+            transform-style: preserve-3d;
+            backface-visibility: hidden;
+        }
+
+        .door-panel-left {
+            left: 0;
+            transform-origin: left center;
+        }
+
+        .door-panel-right {
+            right: 0;
+            transform-origin: right center;
+        }
+
+        /* Wood surface */
+        .door-wood {
+            position: absolute;
+            inset: 0;
+            background:
+                repeating-linear-gradient(180deg,
+                    transparent, transparent 3px,
+                    rgba(139, 90, 43, 0.015) 3px, rgba(139, 90, 43, 0.015) 4px),
+                linear-gradient(180deg,
+                    #221810 0%, #2c1f13 2%, #3d2b1a 8%,
+                    #4a3522 20%, #3d2b1a 35%,
+                    #352618 50%,
+                    #3d2b1a 65%, #4a3522 80%,
+                    #3d2b1a 92%, #2c1f13 98%, #221810 100%);
+        }
+
+        /* Glass insert */
+        .door-glass {
+            position: absolute;
+            top: 28%;
+            width: 56%;
+            height: 40%;
+            background: linear-gradient(135deg,
+                    rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.06) 40%, rgba(255, 255, 255, 0.015));
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(1px);
+            z-index: 12;
+        }
+
+        .door-panel-left .door-glass {
+            left: 22%;
+        }
+
+        .door-panel-right .door-glass {
+            right: 22%;
+        }
+
+        /* Reflection shimmer */
+        .door-glass::after {
+            content: '';
+            position: absolute;
+            top: -100%;
+            left: -100%;
+            width: 300%;
+            height: 300%;
+            background: linear-gradient(120deg, transparent 35%, rgba(255, 255, 255, 0.04) 45%, transparent 55%);
+            animation: shimmer 5s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+
+            0%,
+            100% {
+                transform: translate(-20%, -20%);
+            }
+
+            50% {
+                transform: translate(20%, 20%);
+            }
+        }
+
+        /* Handle */
+        .door-handle {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 6px;
+            height: 70px;
+            background: linear-gradient(180deg, #8a7a5a, #d4b87e, #c9a96e, #8a7a5a);
+            border-radius: 3px;
+            z-index: 15;
+            box-shadow: 1px 2px 8px rgba(0, 0, 0, 0.5), inset 0 0 3px rgba(255, 255, 255, 0.1);
+        }
+
+        .door-panel-left .door-handle {
+            right: 16px;
+        }
+
+        .door-panel-right .door-handle {
+            left: 16px;
+        }
+
+        /* Edge shadows */
+        .door-panel-left::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 20px;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.6));
+            z-index: 14;
+        }
+
+        .door-panel-right::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 20px;
+            height: 100%;
+            background: linear-gradient(270deg, transparent, rgba(0, 0, 0, 0.6));
+            z-index: 14;
+        }
+
+        /* ── CTA ── */
+        .cta-overlay {
+            position: absolute;
+            z-index: 50;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.2rem;
+            pointer-events: none;
+        }
+
+        .cta-text {
+            font-family: var(--font-accent);
+            font-size: 0.85rem;
+            letter-spacing: 0.35em;
+            text-transform: uppercase;
+            color: var(--accent);
+        }
+
+        .cta-icon {
+            width: 64px;
+            height: 64px;
+            border: 1px solid rgba(201, 169, 110, 0.35);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            pointer-events: auto;
+            background: rgba(201, 169, 110, 0.03);
+            backdrop-filter: blur(4px);
+            transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+
+        .cta-icon:hover {
+            background: rgba(201, 169, 110, 0.12);
+            border-color: var(--accent);
+            transform: scale(1.12);
+            box-shadow: 0 0 50px rgba(201, 169, 110, 0.15);
+        }
+
+        .cta-icon svg {
+            width: 22px;
+            height: 22px;
+            color: var(--accent);
+        }
+
+        .cta-sub {
+            font-size: 0.55rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+
+        /* ── WELCOME TEXT ── */
+        .welcome-text {
+            position: absolute;
+            z-index: 5;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .welcome-title {
+            font-family: var(--font-head);
+            font-size: clamp(1.8rem, 3.5vw, 3rem);
+            font-weight: 400;
+            margin-bottom: 0.4rem;
+        }
+
+        .welcome-title em {
+            font-style: italic;
+            color: var(--accent);
+        }
+
+        .welcome-sub {
+            font-family: var(--font-accent);
+            font-size: 0.85rem;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+
+        /* ── STATUS ── */
+        .status-bar {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            z-index: 100;
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--accent);
+            opacity: 0.5;
+        }
+
+        .status-dot.active {
+            opacity: 1;
+            box-shadow: 0 0 8px rgba(201, 169, 110, 0.4);
+        }
+
+        .status-text {
+            font-size: 0.6rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+
+        .close-btn {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 100;
+            font-size: 0.6rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--muted);
+            background: none;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 0.5rem 1.2rem;
+            cursor: pointer;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s;
+            font-family: var(--font-body);
+        }
+
+        .close-btn:hover {
+            color: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .close-btn.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* ── MEASUREMENT ANNOTATIONS ── */
+        .measurements {
+            position: absolute;
+            inset: 0;
+            z-index: 3;
+            pointer-events: none;
+        }
+
+        .meas-line {
+            position: absolute;
+            background: rgba(201, 169, 110, 0.15);
+        }
+
+        .meas-h {
+            height: 1px;
+        }
+
+        .meas-v {
+            width: 1px;
+        }
+
+        .meas-label {
+            position: absolute;
+            font-size: 0.5rem;
+            letter-spacing: 0.15em;
+            color: rgba(201, 169, 110, 0.5);
+            font-family: var(--font-body);
+            white-space: nowrap;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="cursor-dot" id="cursorDot"></div>
+    <div class="cursor-ring" id="cursorRing"></div>
+
+    <a href="index.html" class="back-link">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M19 12H5M5 12L12 19M5 12L12 5" />
+        </svg>
+        Back
+    </a>
+
+    <div class="page-title">
+        <span class="page-title-the">The</span>
+        <span class="page-title-name">Insidestory</span>
+    </div>
+
+    <div class="scene" id="scene">
+        <div class="ambient-glow" id="ambientGlow"></div>
+        <div class="particles" id="particles"></div>
+
+        <!-- Room behind -->
+        <div class="room-behind" id="roomBehind"></div>
+
+        <!-- SVG Blueprint Overlay -->
+        <div class="blueprint-overlay" id="blueprintOverlay">
+            <svg viewBox="0 0 900 600" preserveAspectRatio="none">
+                <!-- Outer frame -->
+                <rect class="bp-line" id="bp-frame" x="10" y="10" width="880" height="580" rx="2" />
+                <!-- Door panel division -->
+                <line class="bp-line" id="bp-center" x1="450" y1="10" x2="450" y2="590" />
+                <!-- Left panel subdivisions -->
+                <rect class="bp-line" id="bp-glass-l" x="120" y="170" width="230" height="240" rx="1" />
+                <!-- Right panel subdivisions -->
+                <rect class="bp-line" id="bp-glass-r" x="550" y="170" width="230" height="240" rx="1" />
+                <!-- Handle markers -->
+                <circle class="bp-annotation" id="bp-handle-l" cx="420" cy="300" r="8" />
+                <circle class="bp-annotation" id="bp-handle-r" cx="480" cy="300" r="8" />
+                <!-- Dimension lines -->
+                <line class="bp-dim-line" id="bp-dim-top" x1="10" y1="3" x2="890" y2="3" />
+                <line class="bp-dim-line" id="bp-dim-left" x1="3" y1="10" x2="3" y2="590" />
+                <line class="bp-dim-line" id="bp-dim-bottom" x1="10" y1="597" x2="890" y2="597" />
+                <!-- Labels -->
+                <text class="bp-text" x="380" y="0" dy="-2">2400 MM</text>
+                <text class="bp-text" x="-300" y="6" transform="rotate(-90)" dy="-5">1800 MM</text>
+                <text class="bp-text" x="180" y="165">FROSTED GLASS</text>
+                <text class="bp-text" x="600" y="165">FROSTED GLASS</text>
+                <text class="bp-text" x="390" y="310" style="font-size:6px">HANDLE</text>
+                <text class="bp-text" x="50" y="595" style="font-size:6px">WALNUT — GRADE A</text>
+                <!-- Track detail -->
+                <line class="bp-line" id="bp-track" x1="0" y1="18" x2="900" y2="18" style="stroke-width:0.5" />
+                <!-- Cross hatching in glass areas -->
+                <line class="bp-dim-line" x1="120" y1="170" x2="350" y2="410" />
+                <line class="bp-dim-line" x1="350" y1="170" x2="120" y2="410" />
+                <line class="bp-dim-line" x1="550" y1="170" x2="780" y2="410" />
+                <line class="bp-dim-line" x1="780" y1="170" x2="550" y2="410" />
+            </svg>
+        </div>
+
+        <!-- Door Frame -->
+        <div class="door-frame" id="doorFrame">
+            <div class="door-track"></div>
+
+            <div class="door-panel door-panel-left" id="doorLeft">
+                <div class="door-wood"></div>
+                <div class="door-glass"></div>
+                <div class="door-handle"></div>
+            </div>
+
+            <div class="door-panel door-panel-right" id="doorRight">
+                <div class="door-wood"></div>
+                <div class="door-glass"></div>
+                <div class="door-handle"></div>
+            </div>
+        </div>
+
+        <!-- CTA -->
+        <div class="cta-overlay" id="ctaOverlay">
+            <span class="cta-text">Open the Door</span>
+            <div class="cta-icon" id="openBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M18 8L22 12L18 16" />
+                    <path d="M6 8L2 12L6 16" />
+                    <line x1="9" y1="12" x2="15" y2="12" />
+                </svg>
+            </div>
+            <span class="cta-sub">Click or press Space</span>
+        </div>
+
+        <!-- Welcome Text -->
+        <div class="welcome-text" id="welcomeText">
+            <h2 class="welcome-title">Welcome to <em>Your Story</em></h2>
+            <p class="welcome-sub">Step inside the experience</p>
+        </div>
+    </div>
+
+    <div class="status-bar">
+        <div class="status-dot active" id="statusDot"></div>
+        <span class="status-text" id="statusText">Click to open</span>
+    </div>
+    <button class="close-btn" id="closeBtn">Close Door</button>
+
+    <script>
+        (function () {
+            'use strict';
+
+            // ── DOM ──
+            var doorLeft = document.getElementById('doorLeft');
+            var doorRight = document.getElementById('doorRight');
+            var openBtn = document.getElementById('openBtn');
+            var closeBtn = document.getElementById('closeBtn');
+            var ctaOverlay = document.getElementById('ctaOverlay');
+            var welcomeText = document.getElementById('welcomeText');
+            var ambientGlow = document.getElementById('ambientGlow');
+            var roomBehind = document.getElementById('roomBehind');
+            var blueprintOverlay = document.getElementById('blueprintOverlay');
+            var statusText = document.getElementById('statusText');
+            var statusDot = document.getElementById('statusDot');
+            var particlesContainer = document.getElementById('particles');
+            var cursorDot = document.getElementById('cursorDot');
+            var cursorRing = document.getElementById('cursorRing');
+            var isOpen = false;
+            var isAnimating = false;
+
+            // ══════════════════════════════════════════════════
+            // CUSTOM CURSOR
+            // ══════════════════════════════════════════════════
+            var mx = 0, my = 0, dx = 0, dy = 0, rx = 0, ry = 0;
+            document.addEventListener('mousemove', function (e) { mx = e.clientX; my = e.clientY; });
+            (function cursorLoop() {
+                dx += (mx - dx) * 0.9;
+                dy += (my - dy) * 0.9;
+                rx += (mx - rx) * 0.12;
+                ry += (my - ry) * 0.12;
+                cursorDot.style.left = dx + 'px';
+                cursorDot.style.top = dy + 'px';
+                cursorRing.style.left = rx + 'px';
+                cursorRing.style.top = ry + 'px';
+                requestAnimationFrame(cursorLoop);
+            })();
+
+            document.querySelectorAll('a, button, .cta-icon').forEach(function (el) {
+                el.addEventListener('mouseenter', function () {
+                    cursorRing.style.width = '55px';
+                    cursorRing.style.height = '55px';
+                    cursorRing.style.borderColor = 'rgba(201,169,110,0.7)';
+                });
+                el.addEventListener('mouseleave', function () {
+                    cursorRing.style.width = '35px';
+                    cursorRing.style.height = '35px';
+                    cursorRing.style.borderColor = 'rgba(201,169,110,0.4)';
+                });
+            });
+
+            // ══════════════════════════════════════════════════
+            // SVG BLUEPRINT DRAW-IN ANIMATION
+            // ══════════════════════════════════════════════════
+            var svgLines = blueprintOverlay.querySelectorAll('.bp-line, .bp-dim-line, .bp-annotation');
+            var svgTexts = blueprintOverlay.querySelectorAll('.bp-text');
+
+            // Calculate and set dashoffsets for stroke drawing
+            svgLines.forEach(function (line) {
+                var length;
+                if (line.getTotalLength) {
+                    length = line.getTotalLength();
+                } else {
+                    // For rects and circles, approximate
+                    if (line.tagName === 'rect') {
+                        var w = parseFloat(line.getAttribute('width')) || 0;
+                        var h = parseFloat(line.getAttribute('height')) || 0;
+                        length = 2 * (w + h);
+                    } else if (line.tagName === 'circle') {
+                        var r = parseFloat(line.getAttribute('r')) || 0;
+                        length = 2 * Math.PI * r;
+                    } else {
+                        length = 1000;
+                    }
+                }
+                line.style.strokeDasharray = length;
+                line.style.strokeDashoffset = length;
+            });
+
+            svgTexts.forEach(function (t) { t.style.opacity = '0'; });
+
+            // Draw blueprint on entrance
+            function drawBlueprint() {
+                // Stagger-draw all SVG lines
+                anime({
+                    targets: svgLines,
+                    strokeDashoffset: [anime.setDashoffset, 0],
+                    duration: 2000,
+                    delay: anime.stagger(80, { from: 'center' }),
+                    easing: 'easeInOutCubic',
+                });
+
+                // Fade in text labels
+                anime({
+                    targets: svgTexts,
+                    opacity: [0, 0.6],
+                    duration: 600,
+                    delay: anime.stagger(120, { start: 1400 }),
+                    easing: 'easeOutExpo',
+                });
+            }
+
+            // ══════════════════════════════════════════════════
+            // PARTICLE SYSTEM
+            // ══════════════════════════════════════════════════
+            function createParticle(burst) {
+                var p = document.createElement('div');
+                p.className = 'particle';
+                var size = Math.random() * 3 + 1;
+                var isGold = Math.random() > 0.3;
+                p.style.width = size + 'px';
+                p.style.height = size + 'px';
+                p.style.background = isGold
+                    ? 'rgba(201,169,110,' + (Math.random() * 0.6 + 0.2) + ')'
+                    : 'rgba(255,255,255,' + (Math.random() * 0.3 + 0.1) + ')';
+
+                // Position near center crack
+                var centerX = window.innerWidth / 2;
+                var centerY = window.innerHeight / 2;
+                p.style.left = (centerX + (Math.random() - 0.5) * (burst ? 100 : 300)) + 'px';
+                p.style.top = (centerY + (Math.random() - 0.5) * (burst ? window.innerHeight * 0.6 : window.innerHeight)) + 'px';
+                particlesContainer.appendChild(p);
+
+                anime({
+                    targets: p,
+                    opacity: [0, Math.random() * 0.7 + 0.3, 0],
+                    translateX: function () { return (Math.random() - 0.5) * (burst ? 200 : 80); },
+                    translateY: function () { return (Math.random() - 0.5) * (burst ? 150 : 60) - 40; },
+                    scale: [0, 1, 0.5],
+                    duration: function () { return burst ? 2500 + Math.random() * 1500 : 4000 + Math.random() * 3000; },
+                    easing: 'easeOutExpo',
+                    complete: function () { p.remove(); }
+                });
+            }
+
+            // Ambient floating particles
+            function ambientParticles() {
+                for (var i = 0; i < 3; i++) { createParticle(false); }
+            }
+            setInterval(ambientParticles, 800);
+
+            // ══════════════════════════════════════════════════
+            // DOOR BREATHING MICRO-MOTION
+            // ══════════════════════════════════════════════════
+            var breatheAnim = anime({
+                targets: '.door-frame',
+                scaleX: [1, 1.002, 1],
+                scaleY: [1, 1.001, 1],
+                duration: 4000,
+                easing: 'easeInOutSine',
+                loop: true,
+                direction: 'alternate',
+            });
+
+            // Blueprint pulse
+            anime({
+                targets: svgLines,
+                opacity: [
+                    { value: 0.3, duration: 2000 },
+                    { value: 0.6, duration: 2000 },
+                ],
+                easing: 'easeInOutSine',
+                loop: true,
+                delay: anime.stagger(100),
+            });
+
+            // ══════════════════════════════════════════════════
+            // ENTRANCE SEQUENCE
+            // ══════════════════════════════════════════════════
+            anime({
+                targets: '.door-frame',
+                scale: [0.92, 1],
+                opacity: [0, 1],
+                duration: 1400,
+                easing: 'easeOutExpo',
+            });
+
+            anime({
+                targets: ctaOverlay,
+                opacity: [0, 1],
+                translateY: [25, 0],
+                duration: 900,
+                delay: 1000,
+                easing: 'easeOutExpo',
+            });
+
+            // CTA pulse
+            anime({
+                targets: '.cta-icon',
+                scale: [1, 1.06, 1],
+                boxShadow: [
+                    '0 0 0px rgba(201,169,110,0)',
+                    '0 0 30px rgba(201,169,110,0.15)',
+                    '0 0 0px rgba(201,169,110,0)',
+                ],
+                duration: 2800,
+                easing: 'easeInOutSine',
+                loop: true,
+            });
+
+            // Draw the blueprint with stagger
+            setTimeout(drawBlueprint, 400);
+
+            // ══════════════════════════════════════════════════
+            // OPEN DOOR
+            // ══════════════════════════════════════════════════
+            function openDoor() {
+                if (isAnimating || isOpen) return;
+                isAnimating = true;
+                isOpen = true;
+                breatheAnim.pause();
+                statusText.textContent = 'Opening...';
+
+                // Fade blueprint out
+                anime({
+                    targets: blueprintOverlay,
+                    opacity: [1, 0],
+                    duration: 600,
+                    easing: 'easeOutExpo',
+                });
+
+                // Hide CTA
+                anime({
+                    targets: ctaOverlay,
+                    opacity: 0,
+                    scale: 0.9,
+                    duration: 400,
+                    easing: 'easeOutExpo',
+                });
+
+                // Burst particles from center crack
+                for (var i = 0; i < 30; i++) {
+                    setTimeout(function () { createParticle(true); }, i * 40);
+                }
+
+                // Open left door with 3D rotation + spring
+                anime({
+                    targets: doorLeft,
+                    translateX: [0, '-98%'],
+                    rotateY: [0, 5],
+                    duration: 1800,
+                    easing: 'easeOutElastic(1, 0.6)',
+                    delay: 150,
+                });
+
+                // Open right door
+                anime({
+                    targets: doorRight,
+                    translateX: [0, '98%'],
+                    rotateY: [0, -5],
+                    duration: 1800,
+                    easing: 'easeOutElastic(1, 0.6)',
+                    delay: 150,
+                });
+
+                // Glow
+                setTimeout(function () { ambientGlow.classList.add('active'); }, 200);
+
+                // Reveal room brightness
+                setTimeout(function () { roomBehind.classList.add('revealed'); }, 300);
+
+                // Room zoom with spring
+                anime({
+                    targets: roomBehind,
+                    scale: [1, 1.06],
+                    duration: 2200,
+                    easing: 'easeOutElastic(1, 0.8)',
+                    delay: 300,
+                });
+
+                // Welcome text
+                anime({
+                    targets: welcomeText,
+                    opacity: [0, 1],
+                    translateY: [40, 0],
+                    duration: 1200,
+                    easing: 'easeOutExpo',
+                    delay: 1000,
+                });
+
+                // Show close button
+                setTimeout(function () {
+                    closeBtn.classList.add('visible');
+                    statusText.textContent = 'Door open';
+                    statusDot.style.background = '#4a9e6a';
+                    statusDot.style.boxShadow = '0 0 8px rgba(74,158,106,0.5)';
+                    isAnimating = false;
+                }, 1800);
+            }
+
+            // ══════════════════════════════════════════════════
+            // CLOSE DOOR
+            // ══════════════════════════════════════════════════
+            function closeDoor() {
+                if (isAnimating || !isOpen) return;
+                isAnimating = true;
+                isOpen = false;
+                statusText.textContent = 'Closing...';
+                closeBtn.classList.remove('visible');
+
+                // Hide welcome
+                anime({
+                    targets: welcomeText,
+                    opacity: 0, translateY: 20,
+                    duration: 400, easing: 'easeOutExpo',
+                });
+
+                ambientGlow.classList.remove('active');
+                roomBehind.classList.remove('revealed');
+
+                // Close doors with spring
+                anime({
+                    targets: doorLeft,
+                    translateX: 0, rotateY: 0,
+                    duration: 1400,
+                    easing: 'easeOutElastic(1, 0.5)',
+                    delay: 200,
+                });
+
+                anime({
+                    targets: doorRight,
+                    translateX: 0, rotateY: 0,
+                    duration: 1400,
+                    easing: 'easeOutElastic(1, 0.5)',
+                    delay: 200,
+                });
+
+                anime({
+                    targets: roomBehind,
+                    scale: 1,
+                    duration: 1500,
+                    easing: 'easeOutExpo',
+                });
+
+                // Re-draw blueprint
+                setTimeout(function () {
+                    anime({
+                        targets: blueprintOverlay,
+                        opacity: [0, 1],
+                        duration: 800,
+                        easing: 'easeOutExpo',
+                    });
+                    drawBlueprint();
+
+                    anime({
+                        targets: ctaOverlay,
+                        opacity: 1, scale: 1,
+                        duration: 500,
+                        easing: 'easeOutExpo',
+                    });
+
+                    breatheAnim.play();
+                    statusText.textContent = 'Click to open';
+                    statusDot.style.background = '#c9a96e';
+                    statusDot.style.boxShadow = '0 0 8px rgba(201,169,110,0.4)';
+                    isAnimating = false;
+                }, 1500);
+            }
+
+            // ── Event listeners ──
+            openBtn.addEventListener('click', openDoor);
+            closeBtn.addEventListener('click', closeDoor);
+            doorLeft.addEventListener('click', openDoor);
+            doorRight.addEventListener('click', openDoor);
+            doorLeft.style.cursor = 'none';
+            doorRight.style.cursor = 'none';
+
+            // Keyboard
+            document.addEventListener('keydown', function (e) {
+                if (e.code === 'Space') {
+                    e.preventDefault();
+                    if (isOpen) closeDoor();
+                    else openDoor();
+                }
+            });
+
+        })();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Insidestory — Interior Design Studio</title>
+    <meta name="description"
+        content="The Insidestory by Shiwani Chowdary — Turning walls into conversations. Interior design studio in Hyderabad.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <!-- Splash Screen -->
+    <div id="splashScreen" class="splash-screen">
+        <div class="splash-content">
+            <h1 id="splashGreeting">Hi.</h1>
+            <p>Loading your Experience <span id="splashProgress"></span></p>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <a href="index.html" class="nav-logo">The Insidestory</a>
+        <ul class="nav-links">
+            <li class="nav-dropdown">
+                <a href="#" class="nav-dropdown-toggle">Projects</a>
+                <div class="nav-dropdown-menu">
+                    <a href="projects-contemporary.html">Contemporary</a>
+                    <a href="projects-minimalist.html">Minimalist</a>
+                    <a href="projects-asian-decor.html">Asian Decor</a>
+                </div>
+            </li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="contact.html">Contact</a></li>
+        </ul>
+        <button class="hamburger" id="hamburger" aria-label="Menu">
+            <span></span><span></span><span></span>
+        </button>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobileMenu">
+        <a href="projects-contemporary.html">Contemporary</a>
+        <a href="projects-minimalist.html">Minimalist</a>
+        <a href="projects-asian-decor.html">Asian Decor</a>
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
+    </div>
+
+    <!-- Masonry Grid -->
+    <div class="masonry-grid">
+        <!-- Row 1 -->
+        <div class="masonry-item masonry-item--tall">
+            <img src="assets/Contemporary/contemporary-01.jpeg" alt="Interior Design">
+        </div>
+        <div class="masonry-item masonry-item--tall">
+            <img src="assets/Contemporary/contemporary-05.jpeg" alt="Interior Design">
+        </div>
+
+        <!-- Center Logo Cell -->
+        <div class="logo-cell masonry-item--tall">
+            <div class="dot-grid" style="grid-template-columns: repeat(8, 1fr);">
+                <!-- Row 1: 8 dots -->
+                <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                <!-- Row 2: THE + 5 dots -->
+                <span class="letter">T</span><span class="letter">H</span><span class="letter">E</span>
+                <span class="dot"></span><span class="dot"></span><span class="dot"></span><span
+                    class="dot"></span><span class="dot"></span>
+                <!-- Row 3: INSIDE + 2 dots -->
+                <span class="letter">I</span><span class="letter">N</span><span class="letter">S</span>
+                <span class="letter">I</span><span class="letter">D</span><span class="letter">E</span>
+                <span class="dot"></span><span class="dot"></span>
+                <!-- Row 4: 2 dots + STORY + dot -->
+                <span class="dot"></span><span class="dot"></span>
+                <span class="letter">S</span><span class="letter">T</span><span class="letter">O</span>
+                <span class="letter">R</span><span class="letter">Y</span><span class="dot"></span>
+                <!-- Row 5: 3 dots + BY + 3 dots -->
+                <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                <span class="letter">B</span><span class="letter">Y</span>
+                <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                <!-- Row 6: SHIWANI + dot -->
+                <span class="letter">S</span><span class="letter">H</span><span class="letter">I</span>
+                <span class="letter">W</span><span class="letter">A</span><span class="letter">N</span>
+                <span class="letter">I</span><span class="dot"></span>
+                <!-- Row 7: CHOWDARY -->
+                <span class="letter">C</span><span class="letter">H</span><span class="letter">O</span>
+                <span class="letter">W</span><span class="letter">D</span><span class="letter">A</span>
+                <span class="letter">R</span><span class="letter">Y</span>
+            </div>
+        </div>
+
+        <div class="masonry-item masonry-item--tall">
+            <img src="assets/Asian Deco/asian-deco-01.png" alt="Interior Design">
+        </div>
+        <div class="masonry-item masonry-item--tall">
+            <img src="assets/Asian Deco/asian-deco-03.png" alt="Interior Design">
+        </div>
+
+        <!-- Row 2 -->
+        <div class="masonry-item masonry-item--wide">
+            <img src="assets/Contemporary/contemporary-10.png" alt="Interior Design">
+        </div>
+        <div class="masonry-item">
+            <img src="assets/Minimalist/minimalist-01.jpeg" alt="Interior Design">
+        </div>
+        <div class="masonry-item">
+            <img src="assets/Minimalist/minimalist-03.jpeg" alt="Interior Design">
+        </div>
+        <div class="masonry-item">
+            <img src="assets/Asian Deco/asian-deco-05.png" alt="Interior Design">
+        </div>
+    </div>
+
+    <!-- 3D Model + Timeline Split Section -->
+    <style>
+        .model-scroll-container {
+            height: 500vh;
+            position: relative;
+            background: var(--bg);
+        }
+
+        .model-sticky {
+            position: sticky;
+            top: 0;
+            height: 120vh;
+            width: 100%;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* LEFT: Timeline */
+        .timeline-panel {
+            width: 40%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            padding: 70px 50px 40px 80px;
+            box-sizing: border-box;
+            position: relative;
+            z-index: 5;
+            overflow: hidden;
+        }
+
+        .timeline-panel::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 15%;
+            height: 70%;
+            width: 1px;
+            background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.1), transparent);
+        }
+
+        .timeline-header {
+            margin-bottom: 20px;
+        }
+
+        .timeline-header h2 {
+            font-family: var(--font-serif);
+            font-style: italic;
+            font-size: 2rem;
+            color: var(--text);
+            margin: 0 0 8px;
+            font-weight: 400;
+        }
+
+        .timeline-header p {
+            font-family: var(--font-sans);
+            font-size: 0.7rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+
+        .tl-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+            margin-bottom: 22px;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .tl-number {
+            font-family: var(--font-serif);
+            font-size: 1.6rem;
+            font-weight: 300;
+            color: #1a4f36;
+            /* Unified dark green */
+            line-height: 1;
+            min-width: 36px;
+        }
+
+        .tl-content h3 {
+            font-family: var(--font-sans);
+            font-size: 0.75rem;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: var(--text);
+            margin: 0 0 6px;
+            font-weight: 600;
+        }
+
+        .tl-content p {
+            font-family: var(--font-sans);
+            font-size: 0.8rem;
+            line-height: 1.7;
+            color: var(--text-muted);
+            margin: 0;
+            font-weight: 300;
+        }
+
+        /* RIGHT: 3D Canvas */
+        .model-panel {
+            width: 60%;
+            height: 100%;
+            position: relative;
+        }
+
+        #model-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .model-loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+            text-align: center;
+            color: var(--text);
+            font-family: var(--font-sans);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+        }
+
+        .model-loading .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .model-scroll-hint {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            color: var(--text-muted);
+            font-family: var(--font-sans);
+            font-size: 0.7rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            animation: pulseHint 2s ease-in-out infinite;
+        }
+
+        @keyframes pulseHint {
+
+            0%,
+            100% {
+                opacity: 0.3;
+            }
+
+            50% {
+                opacity: 0.8;
+            }
+        }
+
+        /* Responsive — Tablet */
+        @media (max-width: 900px) {
+            .model-scroll-container {
+                height: 300vh;
+            }
+
+            .model-sticky {
+                flex-direction: column;
+                height: 100vh;
+            }
+
+            .timeline-panel {
+                width: 100%;
+                height: auto;
+                max-height: 45vh;
+                padding: 20px 20px 10px;
+                overflow-y: auto;
+                overflow-x: hidden;
+            }
+
+            .timeline-panel::after {
+                display: none;
+            }
+
+            .model-panel {
+                width: 100%;
+                flex: 1;
+                min-height: 0;
+            }
+
+            .timeline-header {
+                margin-bottom: 10px;
+            }
+
+            .timeline-header h2 {
+                font-size: 1.4rem;
+                margin: 0 0 4px;
+            }
+
+            .timeline-header p {
+                font-size: 0.6rem;
+            }
+
+            .tl-item {
+                margin-bottom: 8px;
+                gap: 10px;
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+            .tl-number {
+                font-size: 1.2rem;
+                min-width: 26px;
+            }
+
+            .tl-content h3 {
+                font-size: 0.6rem;
+                letter-spacing: 0.12em;
+                margin: 0 0 2px;
+            }
+
+            .tl-content p {
+                font-size: 0.65rem;
+                line-height: 1.45;
+            }
+        }
+
+        /* Responsive — Small phone */
+        @media (max-width: 480px) {
+            .model-scroll-container {
+                height: 250vh;
+            }
+
+            .model-sticky {
+                height: 100vh;
+            }
+
+            .timeline-panel {
+                max-height: 40vh;
+                padding: 12px 12px 8px;
+            }
+
+            .timeline-header h2 {
+                font-size: 1.1rem;
+                margin: 0 0 2px;
+            }
+
+            .timeline-header p {
+                font-size: 0.55rem;
+            }
+
+            .tl-item {
+                margin-bottom: 5px;
+                gap: 6px;
+            }
+
+            .tl-number {
+                font-size: 1rem;
+                min-width: 22px;
+            }
+
+            .tl-content h3 {
+                font-size: 0.55rem;
+                letter-spacing: 0.08em;
+                margin: 0 0 1px;
+            }
+
+            .tl-content p {
+                font-size: 0.58rem;
+                line-height: 1.35;
+            }
+
+            .model-scroll-hint {
+                font-size: 0.5rem;
+                bottom: 10px;
+            }
+        }
+    </style>
+
+    <section class="model-scroll-container" id="modelScrollContainer">
+        <div class="model-sticky">
+
+            <!-- LEFT: Project Timeline -->
+            <div class="timeline-panel">
+                <div class="timeline-header">
+                    <h2>The Journey</h2>
+                    <p>From concept to completion</p>
+                </div>
+
+                <div class="tl-item" data-tl="1">
+                    <span class="tl-number">01</span>
+                    <div class="tl-content">
+                        <h3>Discovery</h3>
+                        <p>Understanding the client's lifestyle, aspirations, and the way they inhabit space. Every
+                            detail informs the design direction.</p>
+                    </div>
+                </div>
+
+                <div class="tl-item" data-tl="2">
+                    <span class="tl-number">02</span>
+                    <div class="tl-content">
+                        <h3>Concept &amp; Layout</h3>
+                        <p>Spatial planning meets creative vision. We map the flow of daily life into architectural form
+                            — functional, beautiful, intentional.</p>
+                    </div>
+                </div>
+
+                <div class="tl-item" data-tl="3">
+                    <span class="tl-number">03</span>
+                    <div class="tl-content">
+                        <h3>Material Curation</h3>
+                        <p>Marble, walnut, brass, linen — each material is chosen for its character. Textures are
+                            layered to create warmth and depth.</p>
+                    </div>
+                </div>
+
+                <div class="tl-item" data-tl="4">
+                    <span class="tl-number">04</span>
+                    <div class="tl-content">
+                        <h3>Realization</h3>
+                        <p>The space comes alive. Every joint, every finish, every piece of furniture placed to turn
+                            walls into conversations.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT: 3D Model -->
+            <div class="model-panel">
+                <div class="model-loading" id="modelLoading">
+                    <div class="spinner"></div>
+                    <p>Loading 3D Environment</p>
+                </div>
+                <div class="model-scroll-hint" id="scrollHint">Scroll to explore</div>
+                <canvas id="model-canvas"></canvas>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section class="envelope-accordion" id="servicesEnvelope">
+        <div class="envelope-titles">
+            <h2>Services</h2>
+            <p>What we bring to the table</p>
+        </div>
+        <div class="envelope-stack">
+            <div class="envelope-folder active"
+                style="--bg-url: url('assets/Moodboard/moodboard_marble_1774366851176.png');">
+                <div class="envelope-tab">Residential Interiors</div>
+                <div class="envelope-content">
+                    <h3>Residential Interiors</h3>
+                    <p>Bespoke living spaces designed around your lifestyle — from cozy apartments to luxury villas.</p>
+                </div>
+            </div>
+            <div class="envelope-folder" style="--bg-url: url('assets/Moodboard/moodboard_linen_1774366873061.png');">
+                <div class="envelope-tab">Commercial Design</div>
+                <div class="envelope-content">
+                    <h3>Commercial Design</h3>
+                    <p>Offices, retail, and hospitality spaces that embody your brand identity and elevate the
+                        experience.</p>
+                </div>
+            </div>
+            <div class="envelope-folder" style="--bg-url: url('assets/Moodboard/moodboard_brass_1774366891978.png');">
+                <div class="envelope-tab">Space Planning</div>
+                <div class="envelope-content">
+                    <h3>Space Planning</h3>
+                    <p>Strategic layout design that optimizes flow, functionality, and the way people move through
+                        spaces.</p>
+                </div>
+            </div>
+            <div class="envelope-folder" style="--bg-url: url('assets/Moodboard/moodboard_wood_1774366918030.png');">
+                <div class="envelope-tab">Furniture Curation</div>
+                <div class="envelope-content">
+                    <h3>Furniture Curation</h3>
+                    <p>Hand-picked furniture and decor sourced globally — each piece chosen to tell your story.</p>
+                </div>
+            </div>
+            <div class="envelope-folder" style="--bg-url: url('assets/Moodboard/moodboard_paint_1774366938722.png');">
+                <div class="envelope-tab">3D Visualization</div>
+                <div class="envelope-content">
+                    <h3>3D Visualization</h3>
+                    <p>Photorealistic renders and walkthroughs that bring your dream space to life before construction
+                        begins.</p>
+                </div>
+            </div>
+            <div class="envelope-folder" style="--bg-url: url('assets/Moodboard/moodboard_sketch_1774366957464.png');">
+                <div class="envelope-tab">Turnkey Execution</div>
+                <div class="envelope-content">
+                    <h3>Turnkey Execution</h3>
+                    <p>End-to-end project management from concept to handover — we handle every detail so you don't have
+                        to.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Three.js Import Map -->
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+        }
+    }
+    </script>
+
+    <!-- GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <!-- 3D Model + Timeline Animation -->
+    <script type="module">
+        import * as THREE from 'three';
+        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+        import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
+
+        gsap.registerPlugin(ScrollTrigger);
+
+        const canvas = document.getElementById('model-canvas');
+        const panel = document.querySelector('.model-panel');
+        const loadingEl = document.getElementById('modelLoading');
+        const scrollHint = document.getElementById('scrollHint');
+        const splashScreen = document.getElementById('splashScreen');
+        const splashGreeting = document.getElementById('splashGreeting');
+        const splashProgress = document.getElementById('splashProgress');
+
+        const splashStartTime = Date.now();
+
+        // Greeting toggle Hi -> Hola with slide-fade transition
+        setTimeout(() => {
+            if (splashGreeting) {
+                splashGreeting.style.opacity = '0';
+                splashGreeting.style.transform = 'translateY(-20px)';
+
+                setTimeout(() => {
+                    splashGreeting.textContent = 'Hola.';
+                    splashGreeting.style.transform = 'translateY(20px)';
+
+                    requestAnimationFrame(() => {
+                        splashGreeting.style.opacity = '1';
+                        splashGreeting.style.transform = 'translateY(0)';
+                    });
+                }, 400);
+            }
+        }, 1200);
+
+        // Scene
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xf2f2f2);
+
+        // Renderer — optimized: lower pixel ratio, sized to panel not full window
+        const pw = panel.clientWidth;
+        const ph = panel.clientHeight;
+        const renderer = new THREE.WebGLRenderer({
+            canvas, antialias: true, powerPreference: 'default'
+        });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+        renderer.setSize(pw, ph);
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.2;
+        renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+        // Camera — sized to panel
+        const camera = new THREE.PerspectiveCamera(45, pw / ph, 0.1, 500);
+        const camState = { px: 0, py: 15, pz: 0, tx: 0, ty: 0, tz: 0 };
+
+        // Lighting
+        scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+        const dirLight = new THREE.DirectionalLight(0xfff5e8, 1.5);
+        dirLight.position.set(5, 10, 7);
+        scene.add(dirLight);
+        const fillLight = new THREE.DirectionalLight(0xe8f0ff, 0.4);
+        fillLight.position.set(-5, 3, -5);
+        scene.add(fillLight);
+
+        // DRACO Loader
+        const dracoLoader = new DRACOLoader();
+        dracoLoader.setDecoderPath('https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/libs/draco/');
+        const loader = new GLTFLoader();
+        loader.setDRACOLoader(dracoLoader);
+
+        let needsRender = true;
+
+        // Load model
+        loader.load(
+            'assets/models/room-latest.glb',
+            (gltf) => {
+                const model = gltf.scene;
+                scene.add(model);
+
+                // Center & scale
+                const box = new THREE.Box3().setFromObject(model);
+                const center = box.getCenter(new THREE.Vector3());
+                const size = box.getSize(new THREE.Vector3());
+                model.position.sub(center);
+                const scale = 6 / Math.max(size.x, size.y, size.z);
+                model.scale.setScalar(scale);
+
+                const box2 = new THREE.Box3().setFromObject(model);
+                const c = box2.getCenter(new THREE.Vector3());
+
+                // Starting camera: isometric top-left
+                camState.px = c.x - 6;
+                camState.py = c.y + 10;
+                camState.pz = c.z + 6;
+                camState.tx = c.x; camState.ty = c.y; camState.tz = c.z;
+
+                camera.position.set(camState.px, camState.py, camState.pz);
+                camera.lookAt(c);
+
+                loadingEl.style.display = 'none';
+                needsRender = true;
+
+                if (splashScreen) {
+                    const elapsed = Date.now() - splashStartTime;
+                    const minDisplayTime = 5000; // Force 5 seconds minimum
+                    const timeLeft = Math.max(0, minDisplayTime - elapsed);
+
+                    setTimeout(() => {
+                        splashScreen.style.opacity = '0';
+                        setTimeout(() => splashScreen.style.display = 'none', 800);
+                    }, timeLeft);
+                }
+
+                // GSAP Scroll Timeline for camera
+                const tl = gsap.timeline({
+                    scrollTrigger: {
+                        trigger: '#modelScrollContainer',
+                        start: 'top top',
+                        end: 'bottom bottom',
+                        scrub: 1.5,
+                        onUpdate: () => {
+                            camera.position.set(camState.px, camState.py, camState.pz);
+                            camera.lookAt(camState.tx, camState.ty, camState.tz);
+                            needsRender = true;
+                        }
+                    }
+                });
+
+                // Phase 1 (0-25%): Top-left isometric → right-side 3/4
+                tl.to(camState, {
+                    px: c.x + 8, py: c.y + 7, pz: c.z + 5,
+                    duration: 1, ease: 'power1.inOut'
+                }, 0);
+
+                // Phase 2 (25-50%): 3/4 → front higher angle
+                tl.to(camState, {
+                    px: c.x + 2, py: c.y + 5, pz: c.z + 10,
+                    duration: 1, ease: 'power2.inOut'
+                }, 1);
+
+                // Phase 3 (50-75%): Front → swing to other side
+                tl.to(camState, {
+                    px: c.x - 3, py: c.y + 3, pz: c.z + 8,
+                    duration: 1, ease: 'power2.inOut'
+                }, 2);
+
+                // Phase 4 (75-100%): Final zoom to eye level
+                tl.to(camState, {
+                    px: c.x + 0.3, py: c.y + 1.2, pz: c.z + 6,
+                    duration: 1, ease: 'power2.inOut'
+                }, 3);
+
+                // Fade scroll hint
+                tl.to(scrollHint, { opacity: 0, duration: 0.3 }, 0);
+
+                // Timeline text parallax: reveal each item at 0%, 25%, 50%, 75%
+                document.querySelectorAll('.tl-item').forEach((item, i) => {
+                    tl.to(item, {
+                        opacity: 1,
+                        y: 0,
+                        duration: 0.5,
+                        ease: 'power2.out'
+                    }, i * 0.8);
+                });
+            },
+            (progress) => {
+                if (progress.total > 0) {
+                    const pct = Math.round((progress.loaded / progress.total) * 100);
+                    loadingEl.querySelector('p').textContent = 'Loading 3D Environment \u2014 ' + pct + '%';
+                    if (splashProgress) splashProgress.textContent = pct + '%';
+                }
+            },
+            (error) => {
+                console.error('GLB load error:', error);
+                loadingEl.querySelector('p').textContent = 'Failed to load 3D model';
+                if (splashScreen) {
+                    if (splashGreeting) splashGreeting.textContent = 'Error.';
+                    setTimeout(() => {
+                        splashScreen.style.opacity = '0';
+                        setTimeout(() => splashScreen.style.display = 'none', 800);
+                    }, 2000);
+                }
+            }
+        );
+
+        // Render loop — only renders when needed
+        function animate() {
+            requestAnimationFrame(animate);
+            if (needsRender) {
+                renderer.render(scene, camera);
+                needsRender = false;
+            }
+        }
+        animate();
+
+        // Resize — sized to panel
+        window.addEventListener('resize', () => {
+            const w = panel.clientWidth;
+            const h = panel.clientHeight;
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+            renderer.setSize(w, h);
+            needsRender = true;
+        });
+    </script>
+
+    <script src="app.js"></script>
+</body>
+
+</html>

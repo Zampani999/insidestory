@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Insidestory — Revolving Building</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.2/lib/anime.min.js"></script>
+    <style>
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #050810;
+            --text: #f5f0eb;
+            --accent: #c9a96e;
+            --muted: #6a655f;
+            --dim: #333;
+            --blueprint: rgba(201, 169, 110, 0.2);
+            --font-head: 'Playfair Display', serif;
+            --font-body: 'Inter', sans-serif;
+            --font-accent: 'Cormorant Garamond', serif;
+        }
+
+        html {
+            scrollbar-width: thin;
+            scrollbar-color: var(--accent) var(--bg);
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--bg);
+            color: var(--text);
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+            cursor: none;
+        }
+
+        /* ── CURSOR ── */
+        .cursor-dot {
+            position: fixed;
+            width: 5px;
+            height: 5px;
+            background: var(--accent);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+        }
+
+        .cursor-ring {
+            position: fixed;
+            width: 35px;
+            height: 35px;
+            border: 1px solid rgba(201, 169, 110, 0.4);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9998;
+            transform: translate(-50%, -50%);
+            transition: width 0.3s, height 0.3s;
+        }
+
+        /* ── NAV ── */
+        .back-link {
+            position: fixed;
+            top: 2rem;
+            left: 2rem;
+            z-index: 200;
+            font-size: 0.7rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--muted);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: color 0.3s;
+        }
+
+        .back-link:hover {
+            color: var(--accent);
+        }
+
+        .page-title {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            text-align: right;
+            z-index: 200;
+        }
+
+        .page-title-the {
+            display: block;
+            font-family: var(--font-accent);
+            font-size: 0.55rem;
+            letter-spacing: 0.35em;
+            text-transform: uppercase;
+            color: var(--accent);
+        }
+
+        .page-title-name {
+            font-family: var(--font-head);
+            font-size: 0.95rem;
+            font-weight: 400;
+        }
+
+        /* ── SCROLL SPACER ── */
+        .scroll-spacer {
+            height: 600vh;
+            position: relative;
+        }
+
+        /* ── FIXED VIEWPORT ── */
+        .fixed-viewport {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            perspective: 2200px;
+            overflow: hidden;
+        }
+
+        /* ── STARFIELD ── */
+        .starfield {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .star {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.7);
+        }
+
+        /* ── PARTICLES ── */
+        .particles {
+            position: fixed;
+            inset: 0;
+            z-index: 2;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+            opacity: 0;
+        }
+
+        /* ── BUILDING 3D CUBE ── */
+        .building-container {
+            position: relative;
+            z-index: 10;
+            transform-style: preserve-3d;
+            width: 300px;
+            height: 500px;
+        }
+
+        .building-face {
+            position: absolute;
+            width: 300px;
+            height: 500px;
+            backface-visibility: hidden;
+            overflow: hidden;
+            border-radius: 3px;
+        }
+
+        .building-face img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .face-front {
+            transform: translateZ(150px);
+        }
+
+        .face-right {
+            transform: rotateY(90deg) translateZ(150px);
+        }
+
+        .face-back {
+            transform: rotateY(180deg) translateZ(150px);
+        }
+
+        .face-left {
+            transform: rotateY(-90deg) translateZ(150px);
+        }
+
+        /* ── WINDOW GRID OVERLAY ── */
+        .window-grid {
+            position: absolute;
+            inset: 0;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(8, 1fr);
+            gap: 5px;
+            padding: 18px 10px;
+            pointer-events: none;
+        }
+
+        .window-cell {
+            background: rgba(255, 220, 140, 0);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            border-radius: 1px;
+            transition: background 1.8s, box-shadow 1.8s;
+        }
+
+        .window-cell.lit {
+            background: rgba(255, 220, 140, 0.2);
+            box-shadow: inset 0 0 6px rgba(255, 200, 100, 0.12), 0 0 8px rgba(255, 200, 100, 0.06);
+        }
+
+        /* ── SVG WIREFRAME OVERLAY ── */
+        .wireframe-overlay {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .wireframe-overlay svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .wf-line {
+            fill: none;
+            stroke: var(--accent);
+            stroke-width: 0.8;
+            opacity: 0.6;
+        }
+
+        /* ── FLOOR PLAN (side panel) ── */
+        .floor-plan {
+            position: fixed;
+            left: 3rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 180px;
+            z-index: 100;
+            opacity: 0;
+            transition: opacity 0.8s;
+        }
+
+        .floor-plan.visible {
+            opacity: 1;
+        }
+
+        .fp-label {
+            font-size: 0.55rem;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 0.6rem;
+        }
+
+        .fp-title {
+            font-family: var(--font-head);
+            font-size: 1.1rem;
+            font-weight: 400;
+            margin-bottom: 0.4rem;
+        }
+
+        .fp-title em {
+            color: var(--accent);
+            font-style: italic;
+        }
+
+        .fp-svg {
+            width: 100%;
+            margin-bottom: 0.6rem;
+        }
+
+        .fp-line {
+            fill: none;
+            stroke: rgba(201, 169, 110, 0.5);
+            stroke-width: 1;
+        }
+
+        .fp-fill {
+            fill: rgba(201, 169, 110, 0.06);
+            stroke: rgba(201, 169, 110, 0.3);
+            stroke-width: 0.5;
+        }
+
+        .fp-dim {
+            fill: rgba(201, 169, 110, 0.4);
+            font-size: 5px;
+            font-family: var(--font-body);
+        }
+
+        .fp-desc {
+            font-size: 0.75rem;
+            color: var(--muted);
+            line-height: 1.6;
+        }
+
+        /* ── INFO RIGHT ── */
+        .info-right {
+            position: fixed;
+            right: 3rem;
+            top: 50%;
+            transform: translateY(-50%);
+            max-width: 220px;
+            z-index: 100;
+            opacity: 0;
+            transition: opacity 0.8s;
+        }
+
+        .info-right.visible {
+            opacity: 1;
+        }
+
+        .ir-label {
+            font-size: 0.55rem;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 0.4rem;
+        }
+
+        .ir-title {
+            font-family: var(--font-head);
+            font-size: 1.1rem;
+            font-weight: 400;
+            margin-bottom: 0.4rem;
+        }
+
+        .ir-title em {
+            color: var(--accent);
+            font-style: italic;
+        }
+
+        .ir-desc {
+            font-size: 0.75rem;
+            color: var(--muted);
+            line-height: 1.6;
+        }
+
+        /* ── PROGRESS ── */
+        .progress-bar {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 180px;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 1px;
+            z-index: 100;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: var(--accent);
+            border-radius: 1px;
+        }
+
+        .scroll-hint {
+            position: fixed;
+            bottom: 3rem;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.6rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--muted);
+            z-index: 100;
+        }
+
+        /* ── FLOOR COUNTER ── */
+        .floor-counter {
+            position: fixed;
+            bottom: 2rem;
+            right: 3rem;
+            z-index: 100;
+            text-align: right;
+        }
+
+        .fc-label {
+            font-size: 0.5rem;
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+
+        .fc-number {
+            font-family: var(--font-head);
+            font-size: 2.5rem;
+            color: var(--accent);
+            line-height: 1;
+        }
+
+        /* ── GROUND SHADOW ── */
+        .ground-shadow {
+            position: absolute;
+            bottom: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 400px;
+            height: 30px;
+            background: radial-gradient(ellipse, rgba(0, 0, 0, 0.3), transparent 70%);
+            border-radius: 50%;
+            z-index: 5;
+        }
+
+        @media (max-width: 1024px) {
+
+            .floor-plan,
+            .info-right {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .building-container {
+                width: 200px;
+                height: 340px;
+            }
+
+            .building-face {
+                width: 200px;
+                height: 340px;
+            }
+
+            .face-front {
+                transform: translateZ(100px);
+            }
+
+            .face-right {
+                transform: rotateY(90deg) translateZ(100px);
+            }
+
+            .face-back {
+                transform: rotateY(180deg) translateZ(100px);
+            }
+
+            .face-left {
+                transform: rotateY(-90deg) translateZ(100px);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="cursor-dot" id="cursorDot"></div>
+    <div class="cursor-ring" id="cursorRing"></div>
+
+    <a href="index.html" class="back-link">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M19 12H5M5 12L12 19M5 12L12 5" />
+        </svg>
+        Back
+    </a>
+
+    <div class="page-title">
+        <span class="page-title-the">The</span>
+        <span class="page-title-name">Insidestory</span>
+    </div>
+
+    <div class="starfield" id="starfield"></div>
+    <div class="particles" id="particles"></div>
+
+    <div class="scroll-spacer">
+        <div class="fixed-viewport">
+            <div class="building-container" id="buildingCube">
+                <div class="ground-shadow"></div>
+
+                <div class="building-face face-front">
+                    <img src="images/building-front.png" alt="Front">
+                    <!-- SVG wireframe on top -->
+                    <div class="wireframe-overlay">
+                        <svg viewBox="0 0 300 500">
+                            <rect class="wf-line" x="8" y="8" width="284" height="484" rx="2" />
+                            <line class="wf-line" x1="75" y1="8" x2="75" y2="492" />
+                            <line class="wf-line" x1="150" y1="8" x2="150" y2="492" />
+                            <line class="wf-line" x1="225" y1="8" x2="225" y2="492" />
+                            <line class="wf-line" x1="8" y1="62" x2="292" y2="62" />
+                            <line class="wf-line" x1="8" y1="122" x2="292" y2="122" />
+                            <line class="wf-line" x1="8" y1="182" x2="292" y2="182" />
+                            <line class="wf-line" x1="8" y1="242" x2="292" y2="242" />
+                            <line class="wf-line" x1="8" y1="302" x2="292" y2="302" />
+                            <line class="wf-line" x1="8" y1="362" x2="292" y2="362" />
+                            <line class="wf-line" x1="8" y1="422" x2="292" y2="422" />
+                        </svg>
+                    </div>
+                    <div class="window-grid" id="wgFront"></div>
+                </div>
+
+                <div class="building-face face-right">
+                    <img src="images/building-side.png" alt="Right">
+                    <div class="wireframe-overlay">
+                        <svg viewBox="0 0 300 500">
+                            <rect class="wf-line" x="8" y="8" width="284" height="484" rx="2" />
+                            <line class="wf-line" x1="100" y1="8" x2="100" y2="492" />
+                            <line class="wf-line" x1="200" y1="8" x2="200" y2="492" />
+                            <line class="wf-line" x1="8" y1="62" x2="292" y2="62" />
+                            <line class="wf-line" x1="8" y1="122" x2="292" y2="122" />
+                            <line class="wf-line" x1="8" y1="182" x2="292" y2="182" />
+                            <line class="wf-line" x1="8" y1="242" x2="292" y2="242" />
+                            <line class="wf-line" x1="8" y1="302" x2="292" y2="302" />
+                            <line class="wf-line" x1="8" y1="362" x2="292" y2="362" />
+                            <line class="wf-line" x1="8" y1="422" x2="292" y2="422" />
+                        </svg>
+                    </div>
+                    <div class="window-grid" id="wgRight"></div>
+                </div>
+
+                <div class="building-face face-back">
+                    <img src="images/building-front.png" alt="Back">
+                    <div class="wireframe-overlay">
+                        <svg viewBox="0 0 300 500">
+                            <rect class="wf-line" x="8" y="8" width="284" height="484" rx="2" />
+                            <line class="wf-line" x1="75" y1="8" x2="75" y2="492" />
+                            <line class="wf-line" x1="150" y1="8" x2="150" y2="492" />
+                            <line class="wf-line" x1="225" y1="8" x2="225" y2="492" />
+                        </svg>
+                    </div>
+                    <div class="window-grid" id="wgBack"></div>
+                </div>
+
+                <div class="building-face face-left">
+                    <img src="images/building-side.png" alt="Left">
+                    <div class="wireframe-overlay">
+                        <svg viewBox="0 0 300 500">
+                            <rect class="wf-line" x="8" y="8" width="284" height="484" rx="2" />
+                            <line class="wf-line" x1="100" y1="8" x2="100" y2="492" />
+                            <line class="wf-line" x1="200" y1="8" x2="200" y2="492" />
+                        </svg>
+                    </div>
+                    <div class="window-grid" id="wgLeft"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floor Plan Panel (Left) -->
+    <div class="floor-plan" id="floorPlan">
+        <div class="fp-label">Floor Plan</div>
+        <h3 class="fp-title" id="fpTitle">Penthouse <em>Suite</em></h3>
+        <svg class="fp-svg" viewBox="0 0 180 120" id="fpSvg">
+            <!-- Room outlines -->
+            <rect class="fp-fill" id="fpRoom1" x="5" y="5" width="80" height="50" />
+            <rect class="fp-fill" id="fpRoom2" x="90" y="5" width="85" height="70" />
+            <rect class="fp-fill" id="fpRoom3" x="5" y="60" width="80" height="55" />
+            <rect class="fp-fill" id="fpRoom4" x="90" y="80" width="85" height="35" />
+            <!-- Doors -->
+            <path class="fp-line" d="M 85 25 Q 97 25 97 37" id="fpDoor1" />
+            <path class="fp-line" d="M 45 60 Q 45 48 57 48" id="fpDoor2" />
+            <path class="fp-line" d="M 90 95 Q 78 95 78 83" id="fpDoor3" />
+            <!-- Labels -->
+            <text class="fp-dim" x="25" y="32">Living</text>
+            <text class="fp-dim" x="110" y="35">Master</text>
+            <text class="fp-dim" x="22" y="90">Kitchen</text>
+            <text class="fp-dim" x="110" y="100">Bath</text>
+            <!-- Dimensions -->
+            <text class="fp-dim" x="30" y="3" style="font-size:3.5px">12.5m</text>
+            <text class="fp-dim" x="1" y="60" style="font-size:3.5px" transform="rotate(-90,4,60)">8.2m</text>
+        </svg>
+        <p class="fp-desc" id="fpDesc">4 BHK penthouse with panoramic city views and private terrace garden.</p>
+    </div>
+
+    <!-- Info Panel (Right) -->
+    <div class="info-right" id="infoRight">
+        <div class="ir-label">Design Philosophy</div>
+        <h3 class="ir-title" id="irTitle">Light, Form & <em>Function</em></h3>
+        <p class="ir-desc" id="irDesc">Contemporary facades meet warm interiors. Each window frames a story, each floor
+            a chapter in modern living.</p>
+    </div>
+
+    <span class="scroll-hint">Scroll to Revolve</span>
+    <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+    </div>
+
+    <div class="floor-counter">
+        <div class="fc-label">Floor</div>
+        <div class="fc-number" id="floorNumber">01</div>
+    </div>
+
+    <!-- THREE.JS IMPORTS -->
+    <script async src="https://unpkg.com/es-module-shims@1.8.0/dist/es-module-shims.js"></script>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+        // Wait for DOM
+        document.addEventListener('DOMContentLoaded', () => {
+            const container = document.getElementById('buildingCube');
+            if (!container) return;
+
+            // Clear the old CSS cube content, but keep container format
+            container.innerHTML = '';
+
+            // Adjust container styles to hold canvas
+            container.style.width = '100vw';
+            container.style.height = '100vh';
+            container.style.position = 'fixed';
+            container.style.top = '0';
+            container.style.left = '0';
+            container.style.zIndex = '10'; // Above stars, below UI
+            container.style.pointerEvents = 'none';
+
+            // ══════════════════════════════════════════════════
+            // THREE.JS SETUP
+            // ══════════════════════════════════════════════════
+            const scene = new THREE.Scene();
+
+            // Camera
+            const camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 0, 15); // Will be animated
+
+            // Renderer
+            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            // Add tone mapping for better colors from the GLB
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 1.0;
+            container.appendChild(renderer.domElement);
+
+            // Center group specifically for model rotation
+            const pivot = new THREE.Group();
+            scene.add(pivot);
+
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 1.2);
+            scene.add(ambientLight);
+
+            const directionalLight = new THREE.DirectionalLight(0xfff5e6, 2.5); // Warm sun
+            directionalLight.position.set(5, 5, 5);
+            scene.add(directionalLight);
+
+            const fillLight = new THREE.DirectionalLight(0xaaccff, 1.0); // Cool fill
+            fillLight.position.set(-5, 0, -5);
+            scene.add(fillLight);
+
+            // ══════════════════════════════════════════════════
+            // LOAD GLB MODEL
+            // ══════════════════════════════════════════════════
+            let model = null;
+            const loader = new GLTFLoader();
+
+            // Adding a loading indicator
+            const loadingHtml = document.createElement('div');
+            loadingHtml.style.position = 'absolute';
+            loadingHtml.style.top = '50%';
+            loadingHtml.style.left = '50%';
+            loadingHtml.style.transform = 'translate(-50%, -50%)';
+            loadingHtml.style.color = '#c9a96e';
+            loadingHtml.style.fontFamily = 'var(--font-head)';
+            loadingHtml.style.fontSize = '1.2rem';
+            loadingHtml.innerHTML = 'Loading Skyscraper...';
+            container.appendChild(loadingHtml);
+
+            loader.load(
+                'assets/3d/skyscraper.glb',
+                function (gltf) {
+                    loadingHtml.remove();
+                    model = gltf.scene;
+
+                    // Center the model in the pivot
+                    const box = new THREE.Box3().setFromObject(model);
+                    const center = box.getCenter(new THREE.Vector3());
+                    const size = box.getSize(new THREE.Vector3());
+
+                    // Normalize scale to fit nicely in view
+                    const maxDim = Math.max(size.x, size.y, size.z);
+                    const scale = 12 / maxDim; // Fit within height of ~12 units
+                    model.scale.set(scale, scale, scale);
+
+                    // Offset model so its center is exactly at pivot (0,0,0)
+                    model.position.x = -center.x * scale;
+                    // Lower the building slightly so we look down on it
+                    model.position.y = -center.y * scale - 2;
+                    model.position.z = -center.z * scale;
+
+                    pivot.add(model);
+
+                    // Initial entrance animation
+                    anime({
+                        targets: camera.position,
+                        z: [30, 25],
+                        y: [-5, 2],
+                        duration: 3000,
+                        easing: 'easeOutExpo'
+                    });
+
+                    // Initial rotation
+                    anime({
+                        targets: pivot.rotation,
+                        y: [-Math.PI / 2, 0],
+                        duration: 3000,
+                        easing: 'easeOutExpo'
+                    });
+                },
+                undefined,
+                function (error) {
+                    console.error('Error loading model:', error);
+                    loadingHtml.innerHTML = 'Error loading model';
+                }
+            );
+
+            // ══════════════════════════════════════════════════
+            // SCROLL BEHAVIOR
+            // ══════════════════════════════════════════════════
+            const scrollSpacer = document.querySelector('.scroll-spacer');
+            const progressFill = document.getElementById('progressFill');
+            const floorNumber = document.getElementById('floorNumber');
+            const floorPlan = document.getElementById('floorPlan');
+            const infoRight = document.getElementById('infoRight');
+            const fpLines = document.querySelectorAll('.fp-line, .fp-fill');
+
+            // We use global variables to coordinate with existing code logic
+            let totalScroll = 0;
+            let currentRotationY = 0;
+            let targetRotationY = 0;
+            let currentRotationX = 0;
+            let targetRotationX = 0;
+            let lastFloor = -1;
+            let scrollProgress = 0;
+
+            function updateTotalScroll() {
+                if (scrollSpacer) {
+                    totalScroll = scrollSpacer.offsetHeight - window.innerHeight;
+                }
+
+                // Keep 3D responsive
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            }
+            updateTotalScroll();
+            window.addEventListener('resize', updateTotalScroll);
+
+            var floorData = [
+                { title: 'Ground <em>Lobby</em>', desc: 'Grand entrance with marble reception, concierge desk, and garden atrium.' },
+                { title: 'Residential <em>Studio</em>', desc: '1BHK studio apartments with open-plan kitchen and balcony.' },
+                { title: 'Executive <em>Suite</em>', desc: '2BHK suites with study room, walk-in wardrobe, and city views.' },
+                { title: 'Family <em>Residence</em>', desc: '3BHK family home with children\'s room, utility, and sit-out.' },
+                { title: 'Premium <em>Floor</em>', desc: '3BHK premium with private lift lobby and double-height living.' },
+                { title: 'Sky <em>Garden</em>', desc: 'Community amenities floor — pool, gym, yoga deck, party hall.' },
+                { title: 'Luxury <em>Duplex</em>', desc: '4BHK duplex with internal staircase, home theatre, and terrace.' },
+                { title: 'Penthouse <em>Level</em>', desc: '5BHK penthouse with 360° views, private pool, and entertainment.' },
+                { title: 'Crown <em>Suite</em>', desc: 'Ultra-luxury flagship unit with butler service and helipad access.' },
+                { title: 'Skyline <em>Terrace</em>', desc: 'Rooftop lounge, infinity pool, sunset bar, and observation deck.' },
+            ];
+
+            window.addEventListener('scroll', () => {
+                const scrollY = window.scrollY;
+                scrollProgress = Math.min(scrollY / totalScroll, 1);
+
+                // Rotate 2 full revolutions over the entire scroll
+                targetRotationY = scrollProgress * Math.PI * 4;
+
+                // Add a slight tilt on X to make the revolution more dynamic
+                targetRotationX = Math.sin(scrollProgress * Math.PI * 2) * 0.15;
+
+                // UI Updates
+                if (progressFill) progressFill.style.width = (scrollProgress * 100) + '%';
+
+                // Floor counter
+                const floor = Math.min(Math.floor(scrollProgress * 10) + 1, 10);
+                if (floor !== lastFloor && floorNumber) {
+                    lastFloor = floor;
+                    floorNumber.textContent = floor < 10 ? '0' + floor : '' + floor;
+
+                    const data = floorData[floor - 1];
+                    if (data) {
+                        const fpTitle = document.getElementById('fpTitle');
+                        const fpDesc = document.getElementById('fpDesc');
+                        if (fpTitle) fpTitle.innerHTML = data.title;
+                        if (fpDesc) fpDesc.textContent = data.desc;
+                    }
+
+                    anime({
+                        targets: '.fc-number',
+                        scale: [1.2, 1],
+                        duration: 400,
+                        easing: 'easeOutElastic(1, 0.6)',
+                    });
+                }
+
+                // Show/hide panels
+                if (floorPlan) {
+                    if (scrollProgress > 0.1 && scrollProgress < 0.9) floorPlan.classList.add('visible');
+                    else floorPlan.classList.remove('visible');
+                }
+
+                if (infoRight) {
+                    if (scrollProgress > 0.3 && scrollProgress < 0.7) infoRight.classList.add('visible');
+                    else infoRight.classList.remove('visible');
+                }
+
+                // Draw floor plan SVG
+                fpLines.forEach((line) => {
+                    if (line.getTotalLength) {
+                        const len = line.getTotalLength();
+                        const drawProgress = Math.min(scrollProgress * 3, 1);
+                        line.style.strokeDashoffset = len * (1 - drawProgress);
+                    }
+                });
+            });
+
+            // ══════════════════════════════════════════════════
+            // RENDER LOOP
+            // ══════════════════════════════════════════════════
+            // Continuous idle rotation to keep the scene "alive" even when not scrolling
+            const idleSpeed = 0.002;
+            let idleRotation = 0;
+
+            function animate() {
+                requestAnimationFrame(animate);
+
+                // Interpolate rotations smoothly (lerp) for scroll
+                currentRotationY += (targetRotationY - currentRotationY) * 0.05;
+                currentRotationX += (targetRotationX - currentRotationX) * 0.05;
+
+                idleRotation += idleSpeed;
+
+                if (model) {
+                    pivot.rotation.y = currentRotationY + idleRotation;
+                    pivot.rotation.x = currentRotationX;
+
+                    // Add subtle floating motion
+                    const time = Date.now() * 0.001;
+                    pivot.position.y = Math.sin(time) * 0.2;
+                }
+
+                renderer.render(scene, camera);
+            }
+            animate();
+
+            // Remove the old CSS building bobbing animation since we do it in 3D now
+            // Ensure particles work globally
+            var particlesEl = document.getElementById('particles');
+            function spawnParticle() {
+                if (!particlesEl) return;
+                var p = document.createElement('div');
+                p.className = 'particle';
+                var size = Math.random() * 2.5 + 0.5;
+                p.style.width = size + 'px'; p.style.height = size + 'px';
+                p.style.background = Math.random() > 0.4
+                    ? 'rgba(201,169,110,' + (Math.random() * 0.5 + 0.2) + ')'
+                    : 'rgba(255,255,255,' + (Math.random() * 0.3 + 0.1) + ')';
+                var cx = window.innerWidth / 2;
+                p.style.left = (cx + (Math.random() - 0.5) * window.innerWidth * 0.8) + 'px';
+                p.style.top = (Math.random() * window.innerHeight) + 'px';
+                particlesEl.appendChild(p);
+                anime({
+                    targets: p,
+                    opacity: [0, Math.random() * 0.5 + 0.2, 0],
+                    translateY: -(Math.random() * 100 + 50),
+                    translateX: (Math.random() - 0.5) * 60,
+                    duration: 4000 + Math.random() * 3000,
+                    easing: 'easeOutExpo',
+                    complete: function () { p.remove(); }
+                });
+            }
+            setInterval(function () { for (var i = 0; i < 2; i++) spawnParticle(); }, 600);
+
+            // Cursor
+            const cursorDot = document.getElementById('cursorDot');
+            const cursorRing = document.getElementById('cursorRing');
+            if (cursorDot && cursorRing) {
+                var mx = 0, my = 0, dx = 0, dy = 0, rx = 0, ry = 0;
+                document.addEventListener('mousemove', function (e) { mx = e.clientX; my = e.clientY; });
+                (function cursorLoop() {
+                    dx += (mx - dx) * 0.9; dy += (my - dy) * 0.9;
+                    rx += (mx - rx) * 0.12; ry += (my - ry) * 0.12;
+                    cursorDot.style.left = dx + 'px'; cursorDot.style.top = dy + 'px';
+                    cursorRing.style.left = rx + 'px'; cursorRing.style.top = ry + 'px';
+                    requestAnimationFrame(cursorLoop);
+                })();
+            }
+
+            // Starfield
+            var starfield = document.getElementById('starfield');
+            if (starfield) {
+                for (var i = 0; i < 150; i++) {
+                    var star = document.createElement('div');
+                    star.className = 'star';
+                    star.style.left = Math.random() * 100 + '%';
+                    star.style.top = Math.random() * 100 + '%';
+                    var sz = Math.random() * 2 + 0.5;
+                    star.style.width = sz + 'px'; star.style.height = sz + 'px';
+                    star.style.opacity = Math.random() * 0.5 + 0.1;
+                    starfield.appendChild(star);
+                }
+                anime({
+                    targets: '.star',
+                    opacity: function () { return [Math.random() * 0.2 + 0.05, Math.random() * 0.7 + 0.3]; },
+                    duration: function () { return Math.random() * 3000 + 2000; },
+                    easing: 'easeInOutSine',
+                    loop: true,
+                    direction: 'alternate',
+                    delay: anime.stagger(30, { from: 'center' }),
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>

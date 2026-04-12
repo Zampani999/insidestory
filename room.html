@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Insidestory — Room Rearrangement</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.2/lib/anime.min.js"></script>
+    <style>
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #0a0a0c;
+            --text: #f5f0eb;
+            --accent: #c9a96e;
+            --muted: #6a655f;
+            --dim: #333;
+            --wall: #e8ddd0;
+            --floor-color: #b5956b;
+            --font-head: 'Playfair Display', serif;
+            --font-body: 'Inter', sans-serif;
+            --font-accent: 'Cormorant Garamond', serif;
+        }
+
+        html {
+            scrollbar-width: thin;
+            scrollbar-color: var(--accent) var(--bg);
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            cursor: none;
+        }
+
+        .cursor-dot {
+            position: fixed;
+            width: 5px;
+            height: 5px;
+            background: var(--accent);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+        }
+
+        .cursor-ring {
+            position: fixed;
+            width: 35px;
+            height: 35px;
+            border: 1px solid rgba(201, 169, 110, 0.4);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9998;
+            transform: translate(-50%, -50%);
+            transition: width 0.3s, height 0.3s;
+        }
+
+        .back-link {
+            position: fixed;
+            top: 2rem;
+            left: 2rem;
+            z-index: 100;
+            font-size: 0.7rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--muted);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: color 0.3s;
+        }
+
+        .back-link:hover {
+            color: var(--accent);
+        }
+
+        .page-title {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            text-align: right;
+            z-index: 100;
+        }
+
+        .page-title-the {
+            display: block;
+            font-family: var(--font-accent);
+            font-size: 0.55rem;
+            letter-spacing: 0.35em;
+            text-transform: uppercase;
+            color: var(--accent);
+        }
+
+        .page-title-name {
+            font-family: var(--font-head);
+            font-size: 0.95rem;
+            font-weight: 400;
+        }
+
+        .scroll-spacer {
+            height: 500vh;
+            position: relative;
+        }
+
+        .particles {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+            opacity: 0;
+        }
+
+        /* ── ROOM VIEWPORT ── */
+        .room-viewport {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            perspective: 1000px;
+            z-index: 5;
+        }
+
+        .room-box {
+            position: relative;
+            width: 75vw;
+            max-width: 1000px;
+            height: 60vh;
+            transform-style: preserve-3d;
+        }
+
+        /* Back wall */
+        .room-wall {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, #f0e6d8, #e8ddd0, #ddd2c4);
+            border-radius: 3px;
+            box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.08);
+        }
+
+        /* Floor */
+        .room-floor {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 20%;
+            background:
+                repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.03) 0px, rgba(0, 0, 0, 0.03) 1px, transparent 1px, transparent 70px),
+                repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.02) 0px, rgba(0, 0, 0, 0.02) 1px, transparent 1px, transparent 70px),
+                linear-gradient(180deg, #c4a882, #b5956b);
+        }
+
+        /* Window */
+        .room-window {
+            position: absolute;
+            top: 8%;
+            right: 6%;
+            width: 22%;
+            height: 50%;
+            background: linear-gradient(180deg, #87CEEB 0%, #b0d8ee 40%, #d4ebf5);
+            border: 6px solid #bfad96;
+        }
+
+        .room-window::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            width: 3px;
+            height: 100%;
+            background: #bfad96;
+            transform: translateX(-50%);
+        }
+
+        .room-window::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: #bfad96;
+            transform: translateY(-50%);
+        }
+
+        /* ── SVG FLOOR PLAN UNDERLAY ── */
+        .floor-plan-underlay {
+            position: absolute;
+            bottom: 0;
+            left: 5%;
+            width: 90%;
+            height: 20%;
+            z-index: 3;
+            pointer-events: none;
+            opacity: 0.25;
+        }
+
+        .floor-plan-underlay svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .fpu-line {
+            fill: none;
+            stroke: var(--accent);
+            stroke-width: 0.5;
+            stroke-dasharray: 3 2;
+        }
+
+        .fpu-dim {
+            fill: rgba(201, 169, 110, 0.5);
+            font-size: 5px;
+            font-family: var(--font-body);
+            letter-spacing: 1px;
+        }
+
+        /* ── FURNITURE ITEMS ── */
+        .furniture {
+            position: absolute;
+            z-index: 10;
+            will-change: transform, left, bottom;
+            transition: left 0.05s, bottom 0.05s, right 0.05s, top 0.05s;
+        }
+
+        /* Ghost trail (for moving furniture) */
+        .ghost-trail {
+            position: absolute;
+            z-index: 8;
+            pointer-events: none;
+            opacity: 0;
+        }
+
+        /* SOFA */
+        .sofa {
+            bottom: 20%;
+            left: 12%;
+            width: 260px;
+            height: 120px;
+        }
+
+        .sofa-back {
+            position: absolute;
+            top: 0;
+            left: 2%;
+            width: 96%;
+            height: 32%;
+            background: linear-gradient(180deg, #7a9a8a, #6a8a7a);
+            border-radius: 6px 6px 0 0;
+        }
+
+        .sofa-seat {
+            position: absolute;
+            top: 30%;
+            width: 100%;
+            height: 35%;
+            background: linear-gradient(180deg, #8aaa9a, #7a9a8a);
+            border-radius: 3px;
+        }
+
+        .sofa-base {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 30%;
+            background: linear-gradient(180deg, #5a7a6a, #4a6a5a);
+            border-radius: 0 0 4px 4px;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.25);
+        }
+
+        .sofa-arm-l,
+        .sofa-arm-r {
+            position: absolute;
+            bottom: 0;
+            width: 18px;
+            height: 65%;
+            background: linear-gradient(180deg, #6a8a7a, #5a7a6a);
+            border-radius: 4px;
+        }
+
+        .sofa-arm-l {
+            left: -3px;
+        }
+
+        .sofa-arm-r {
+            right: -3px;
+        }
+
+        .sofa-pillow {
+            position: absolute;
+            top: 8%;
+            width: 42px;
+            height: 36px;
+            border-radius: 6px;
+        }
+
+        .sofa-pillow-1 {
+            left: 15px;
+            background: var(--accent);
+        }
+
+        .sofa-pillow-2 {
+            right: 15px;
+            background: #d4a0a0;
+        }
+
+        .sofa-pillow-3 {
+            left: 65px;
+            background: rgba(201, 169, 110, 0.4);
+            width: 35px;
+            height: 30px;
+            top: 12%;
+        }
+
+        /* COFFEE TABLE */
+        .coffee-table {
+            bottom: 20%;
+            left: 33%;
+            width: 130px;
+            height: 45px;
+        }
+
+        .table-top {
+            position: absolute;
+            top: 0;
+            width: 100%;
+            height: 28%;
+            background: linear-gradient(90deg, #5a3d2b, #7a5740, #5a3d2b);
+            border-radius: 2px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .table-legs {
+            position: absolute;
+            bottom: 0;
+            left: 10%;
+            width: 80%;
+            height: 72%;
+            border-left: 3px solid #444;
+            border-right: 3px solid #444;
+        }
+
+        .table-book {
+            position: absolute;
+            top: -8px;
+            left: 25%;
+            width: 20px;
+            height: 10px;
+            background: var(--accent);
+            border-radius: 1px;
+        }
+
+        .table-vase {
+            position: absolute;
+            top: -16px;
+            left: 55%;
+            width: 12px;
+            height: 18px;
+            background: linear-gradient(180deg, #ddd, #aaa);
+            border-radius: 6px 6px 2px 2px;
+        }
+
+        .table-vase::after {
+            content: '';
+            position: absolute;
+            top: -4px;
+            left: 2px;
+            width: 8px;
+            height: 6px;
+            background: #4a7a5a;
+            border-radius: 50%;
+        }
+
+        /* BOOKSHELF */
+        .bookshelf {
+            bottom: 20%;
+            right: 4%;
+            width: 90px;
+            height: 200px;
+        }
+
+        .shelf-body {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, #4a3020, #6a5040, #4a3020);
+            border-radius: 2px;
+            position: relative;
+            box-shadow: 2px 3px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .shelf-div {
+            position: absolute;
+            left: 5%;
+            width: 90%;
+            height: 2px;
+            background: #3a2010;
+        }
+
+        .shelf-div:nth-child(1) {
+            top: 24%;
+        }
+
+        .shelf-div:nth-child(2) {
+            top: 49%;
+        }
+
+        .shelf-div:nth-child(3) {
+            top: 74%;
+        }
+
+        .shelf-books {
+            position: absolute;
+            left: 8%;
+            width: 84%;
+            display: flex;
+            gap: 2px;
+            align-items: flex-end;
+        }
+
+        .shelf-books:nth-child(4) {
+            bottom: 76%;
+            height: 22%;
+        }
+
+        .shelf-books:nth-child(5) {
+            bottom: 51%;
+            height: 22%;
+        }
+
+        .shelf-books:nth-child(6) {
+            bottom: 26%;
+            height: 22%;
+        }
+
+        .shelf-books:nth-child(7) {
+            bottom: 2%;
+            height: 22%;
+        }
+
+        .book {
+            flex: 1;
+            border-radius: 1px;
+            min-width: 5px;
+        }
+
+        /* FLOOR LAMP */
+        .floor-lamp {
+            bottom: 20%;
+            left: 5%;
+            width: 35px;
+            height: 170px;
+        }
+
+        .lamp-shade {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 36px;
+            height: 30px;
+            background: linear-gradient(180deg, #f5e6d0, #e8d5b8);
+            clip-path: polygon(18% 0, 82% 0, 100% 100%, 0 100%);
+        }
+
+        .lamp-pole {
+            position: absolute;
+            top: 28px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            height: 130px;
+            background: linear-gradient(90deg, #666, #999, #666);
+        }
+
+        .lamp-base {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 24px;
+            height: 4px;
+            background: #555;
+            border-radius: 2px;
+        }
+
+        .lamp-glow {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 180px;
+            background: radial-gradient(ellipse, rgba(255, 220, 150, 0.12), transparent 65%);
+            pointer-events: none;
+            animation: lampPulse 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes lampPulse {
+            0% {
+                opacity: 0.7;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        /* RUG */
+        .rug {
+            bottom: 20%;
+            left: 18%;
+            width: 48%;
+            height: 12px;
+            z-index: 5;
+        }
+
+        .rug-shape {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), #d4b87e, var(--accent));
+            border-radius: 50%;
+            opacity: 0.35;
+        }
+
+        .rug-pattern {
+            position: absolute;
+            inset: 2px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 50%;
+        }
+
+        /* PLANT */
+        .plant {
+            bottom: 20%;
+            right: 12%;
+            width: 45px;
+            height: 85px;
+        }
+
+        .plant-pot {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 26px;
+            background: linear-gradient(180deg, #c67b5c, #a65d3f);
+            clip-path: polygon(8% 0, 92% 0, 82% 100%, 18% 100%);
+        }
+
+        .plant-foliage {
+            position: absolute;
+            bottom: 22px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 55px;
+        }
+
+        .leaf {
+            position: absolute;
+            width: 14px;
+            height: 24px;
+            background: #4a8a5a;
+            border-radius: 50% 50% 50% 0;
+            transform-origin: bottom center;
+        }
+
+        .leaf:nth-child(1) {
+            left: 4px;
+            bottom: 0;
+            transform: rotate(-25deg);
+        }
+
+        .leaf:nth-child(2) {
+            left: 18px;
+            bottom: 0;
+            transform: rotate(0deg);
+        }
+
+        .leaf:nth-child(3) {
+            left: 32px;
+            bottom: 0;
+            transform: rotate(25deg);
+        }
+
+        .leaf:nth-child(4) {
+            left: 10px;
+            bottom: 10px;
+            transform: rotate(-12deg);
+            background: #5a9a6a;
+            height: 28px;
+        }
+
+        .leaf:nth-child(5) {
+            left: 24px;
+            bottom: 10px;
+            transform: rotate(12deg);
+            background: #5a9a6a;
+            height: 28px;
+        }
+
+        .leaf:nth-child(6) {
+            left: 17px;
+            bottom: 18px;
+            transform: rotate(0deg);
+            background: #6aaa7a;
+            height: 22px;
+            width: 12px;
+        }
+
+        /* WALL ART */
+        .wall-art {
+            top: 12%;
+            left: 22%;
+            width: 110px;
+            height: 75px;
+            z-index: 8;
+        }
+
+        .art-frame {
+            width: 100%;
+            height: 100%;
+            border: 3px solid #8a7a6a;
+            background: linear-gradient(135deg, #3a3025, #5a4a3a);
+            border-radius: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 2px 3px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .art-inner {
+            width: 82%;
+            height: 78%;
+            background: linear-gradient(135deg, #c9a96e, #e8d5b8, #c9a96e);
+            border-radius: 1px;
+        }
+
+        /* ── LAYOUT LABEL ── */
+        .layout-label {
+            position: fixed;
+            bottom: 4rem;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            z-index: 100;
+        }
+
+        .layout-name {
+            font-family: var(--font-head);
+            font-size: 1.3rem;
+            font-weight: 400;
+            margin-bottom: 0.3rem;
+        }
+
+        .layout-name em {
+            color: var(--accent);
+            font-style: italic;
+        }
+
+        .layout-desc {
+            font-size: 0.6rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+
+        /* ── PROGRESS ── */
+        .progress-track {
+            position: fixed;
+            right: 2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 2px;
+            height: 160px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 1px;
+            z-index: 100;
+        }
+
+        .progress-thumb {
+            width: 100%;
+            height: 0%;
+            background: var(--accent);
+            border-radius: 1px;
+        }
+
+        .scroll-hint {
+            position: fixed;
+            bottom: 1.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.55rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--dim);
+            z-index: 100;
+        }
+
+        /* ── LAYOUT DOTS ── */
+        .layout-dots {
+            position: fixed;
+            left: 50%;
+            bottom: 1.8rem;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            z-index: 100;
+        }
+
+        .layout-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            border: 1px solid rgba(201, 169, 110, 0.4);
+            background: transparent;
+            transition: all 0.4s;
+        }
+
+        .layout-dot.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            box-shadow: 0 0 6px rgba(201, 169, 110, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            .room-box {
+                width: 92vw;
+                height: 50vh;
+            }
+
+            .sofa {
+                width: 160px;
+                height: 80px;
+            }
+
+            .bookshelf {
+                width: 55px;
+                height: 130px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="cursor-dot" id="cursorDot"></div>
+    <div class="cursor-ring" id="cursorRing"></div>
+
+    <a href="index.html" class="back-link">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M19 12H5M5 12L12 19M5 12L12 5" />
+        </svg>
+        Back
+    </a>
+    <div class="page-title">
+        <span class="page-title-the">The</span>
+        <span class="page-title-name">Insidestory</span>
+    </div>
+
+    <div class="particles" id="particles"></div>
+
+    <div class="scroll-spacer">
+        <div class="room-viewport">
+            <div class="room-box" id="roomBox">
+                <div class="room-wall"></div>
+                <div class="room-floor"></div>
+                <div class="room-window"></div>
+
+                <!-- SVG floor plan underlay -->
+                <div class="floor-plan-underlay">
+                    <svg viewBox="0 0 800 120">
+                        <rect class="fpu-line" x="5" y="5" width="790" height="110" rx="1" />
+                        <line class="fpu-line" x1="200" y1="5" x2="200" y2="115" />
+                        <line class="fpu-line" x1="500" y1="5" x2="500" y2="115" />
+                        <line class="fpu-line" x1="650" y1="5" x2="650" y2="115" />
+                        <text class="fpu-dim" x="80" y="65">LIVING</text>
+                        <text class="fpu-dim" x="320" y="65">DINING</text>
+                        <text class="fpu-dim" x="555" y="65">BED</text>
+                        <text class="fpu-dim" x="700" y="65">BATH</text>
+                        <text class="fpu-dim" x="350" y="15">16.5 M</text>
+                    </svg>
+                </div>
+
+                <!-- Furniture -->
+                <div class="furniture wall-art" id="wallArt">
+                    <div class="art-frame">
+                        <div class="art-inner"></div>
+                    </div>
+                </div>
+                <div class="furniture floor-lamp" id="floorLamp">
+                    <div class="lamp-shade"></div>
+                    <div class="lamp-pole"></div>
+                    <div class="lamp-base"></div>
+                    <div class="lamp-glow"></div>
+                </div>
+                <div class="furniture rug" id="rug">
+                    <div class="rug-shape"></div>
+                    <div class="rug-pattern"></div>
+                </div>
+                <div class="furniture sofa" id="sofa">
+                    <div class="sofa-back"></div>
+                    <div class="sofa-seat"></div>
+                    <div class="sofa-base"></div>
+                    <div class="sofa-arm-l"></div>
+                    <div class="sofa-arm-r"></div>
+                    <div class="sofa-pillow sofa-pillow-1"></div>
+                    <div class="sofa-pillow sofa-pillow-2"></div>
+                    <div class="sofa-pillow sofa-pillow-3"></div>
+                </div>
+                <div class="furniture coffee-table" id="coffeeTable">
+                    <div class="table-top"></div>
+                    <div class="table-legs"></div>
+                    <div class="table-book"></div>
+                    <div class="table-vase"></div>
+                </div>
+                <div class="furniture bookshelf" id="bookshelf">
+                    <div class="shelf-body">
+                        <div class="shelf-div"></div>
+                        <div class="shelf-div"></div>
+                        <div class="shelf-div"></div>
+                        <div class="shelf-books">
+                            <div class="book" style="height:80%;background:#c9a96e"></div>
+                            <div class="book" style="height:92%;background:#8b5e3c"></div>
+                            <div class="book" style="height:68%;background:#d4a0a0"></div>
+                            <div class="book" style="height:85%;background:#5a7a6a"></div>
+                            <div class="book" style="height:75%;background:#c67b5c"></div>
+                        </div>
+                        <div class="shelf-books">
+                            <div class="book" style="height:88%;background:#7a5d4b"></div>
+                            <div class="book" style="height:72%;background:#c9a96e"></div>
+                            <div class="book" style="height:95%;background:#3a3025"></div>
+                            <div class="book" style="height:78%;background:#87CEEB"></div>
+                        </div>
+                        <div class="shelf-books">
+                            <div class="book" style="height:90%;background:#d4a0a0"></div>
+                            <div class="book" style="height:75%;background:#5a3d2b"></div>
+                            <div class="book" style="height:82%;background:#c67b5c"></div>
+                            <div class="book" style="height:70%;background:#8a7a6a"></div>
+                            <div class="book" style="height:80%;background:#4a8a5a"></div>
+                        </div>
+                        <div class="shelf-books">
+                            <div class="book" style="height:80%;background:#c9a96e"></div>
+                            <div class="book" style="height:90%;background:#6b4423"></div>
+                            <div class="book" style="height:72%;background:#87CEEB"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="furniture plant" id="plant">
+                    <div class="plant-foliage">
+                        <div class="leaf"></div>
+                        <div class="leaf"></div>
+                        <div class="leaf"></div>
+                        <div class="leaf"></div>
+                        <div class="leaf"></div>
+                        <div class="leaf"></div>
+                    </div>
+                    <div class="plant-pot"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="layout-label">
+        <div class="layout-name" id="layoutName">Layout: <em>Modern Minimal</em></div>
+        <div class="layout-desc">Scroll to rearrange furniture</div>
+    </div>
+
+    <div class="layout-dots" id="layoutDots"></div>
+
+    <div class="progress-track">
+        <div class="progress-thumb" id="progressThumb"></div>
+    </div>
+    <span class="scroll-hint">Scroll to rearrange</span>
+
+    <script>
+        (function () {
+            'use strict';
+
+            var cursorDot = document.getElementById('cursorDot');
+            var cursorRing = document.getElementById('cursorRing');
+            var sofa = document.getElementById('sofa');
+            var coffeeTable = document.getElementById('coffeeTable');
+            var bookshelf = document.getElementById('bookshelf');
+            var floorLamp = document.getElementById('floorLamp');
+            var rug = document.getElementById('rug');
+            var plant = document.getElementById('plant');
+            var wallArt = document.getElementById('wallArt');
+            var roomBox = document.getElementById('roomBox');
+            var progressThumb = document.getElementById('progressThumb');
+            var layoutName = document.getElementById('layoutName');
+            var layoutDotsEl = document.getElementById('layoutDots');
+            var particlesEl = document.getElementById('particles');
+
+            // Cursor
+            var mx = 0, my = 0, dx = 0, dy = 0, rx = 0, ry = 0;
+            document.addEventListener('mousemove', function (e) { mx = e.clientX; my = e.clientY; });
+            (function cl() {
+                dx += (mx - dx) * 0.9; dy += (my - dy) * 0.9;
+                rx += (mx - rx) * 0.12; ry += (my - ry) * 0.12;
+                cursorDot.style.left = dx + 'px'; cursorDot.style.top = dy + 'px';
+                cursorRing.style.left = rx + 'px'; cursorRing.style.top = ry + 'px';
+                requestAnimationFrame(cl);
+            })();
+
+            // Particles
+            function spawnParticle() {
+                var p = document.createElement('div');
+                p.className = 'particle';
+                var sz = Math.random() * 2 + 0.5;
+                p.style.width = sz + 'px'; p.style.height = sz + 'px';
+                p.style.background = 'rgba(201,169,110,' + (Math.random() * 0.4 + 0.1) + ')';
+                p.style.left = (Math.random() * window.innerWidth) + 'px';
+                p.style.top = (Math.random() * window.innerHeight) + 'px';
+                particlesEl.appendChild(p);
+                anime({
+                    targets: p,
+                    opacity: [0, Math.random() * 0.4 + 0.1, 0],
+                    translateY: -(Math.random() * 80 + 30),
+                    duration: 5000 + Math.random() * 3000,
+                    easing: 'easeOutExpo',
+                    complete: function () { p.remove(); }
+                });
+            }
+            setInterval(function () { spawnParticle(); spawnParticle(); }, 1000);
+
+            // Plant sway micro-motion
+            anime({
+                targets: '.leaf',
+                rotate: function (el, i) { return [anime.get(el, 'rotate') || 0, (Math.random() - 0.5) * 8]; },
+                duration: 3000,
+                easing: 'easeInOutSine',
+                loop: true,
+                direction: 'alternate',
+                delay: anime.stagger(150),
+            });
+
+            // Lamp glow pulse (already CSS, but enhance)
+            anime({
+                targets: '.lamp-glow',
+                opacity: [0.6, 1, 0.6],
+                scale: [0.95, 1.05, 0.95],
+                duration: 4000,
+                easing: 'easeInOutSine',
+                loop: true,
+            });
+
+            // Layout presets
+            var layouts = [
+                { name: 'Modern <em>Minimal</em>', sofa: { left: 12, bottom: 20, rot: 0 }, table: { left: 33, bottom: 20, rot: 0 }, shelf: { right: 4, bottom: 20, rot: 0, useRight: true }, lamp: { left: 5, bottom: 20, rot: 0 }, rug: { left: 18, bottom: 20, rot: 0 }, plant: { right: 12, bottom: 20, rot: 0, useRight: true }, art: { left: 22, top: 12, rot: 0 } },
+                { name: 'Cozy <em>Conversation</em>', sofa: { left: 5, bottom: 25, rot: -6 }, table: { left: 28, bottom: 28, rot: 5 }, shelf: { right: 'auto', left: 2, bottom: 20, rot: 0 }, lamp: { left: 48, bottom: 20, rot: 0 }, rug: { left: 8, bottom: 22, rot: -3 }, plant: { right: 5, bottom: 20, rot: 0, useRight: true }, art: { left: 48, top: 8, rot: -2 } },
+                { name: 'Open <em>Flow</em>', sofa: { left: 28, bottom: 20, rot: 0 }, table: { left: 42, bottom: 30, rot: 12 }, shelf: { right: 2, bottom: 20, rot: 0, useRight: true }, lamp: { left: 2, bottom: 20, rot: 0 }, rug: { left: 22, bottom: 20, rot: 4 }, plant: { right: 18, bottom: 32, rot: 0, useRight: true }, art: { left: 8, top: 6, rot: -3 } },
+                { name: 'Zen <em>Balance</em>', sofa: { left: 22, bottom: 22, rot: 0 }, table: { left: 38, bottom: 24, rot: 0 }, shelf: { right: 8, bottom: 20, rot: 0, useRight: true }, lamp: { left: 55, bottom: 20, rot: 0 }, rug: { left: 14, bottom: 20, rot: 0 }, plant: { right: 6, bottom: 26, rot: 0, useRight: true }, art: { left: 32, top: 10, rot: 2 } },
+                { name: 'Entertainment <em>Hub</em>', sofa: { left: 18, bottom: 20, rot: 4 }, table: { left: 22, bottom: 24, rot: -4 }, shelf: { right: 0, bottom: 20, rot: 0, useRight: true }, lamp: { left: 3, bottom: 20, rot: 0 }, rug: { left: 12, bottom: 20, rot: -2 }, plant: { right: 22, bottom: 20, rot: 0, useRight: true }, art: { left: 12, top: 4, rot: 0 } },
+            ];
+
+            // Create layout dots
+            layouts.forEach(function (_, i) {
+                var dot = document.createElement('div');
+                dot.className = 'layout-dot' + (i === 0 ? ' active' : '');
+                layoutDotsEl.appendChild(dot);
+            });
+
+            var currentLayout = -1;
+            var furnitureItems = [
+                { el: sofa, key: 'sofa', mass: 3 },
+                { el: coffeeTable, key: 'table', mass: 2 },
+                { el: bookshelf, key: 'shelf', mass: 2.5 },
+                { el: floorLamp, key: 'lamp', mass: 1 },
+                { el: rug, key: 'rug', mass: 1.5 },
+                { el: plant, key: 'plant', mass: 0.8 },
+                { el: wallArt, key: 'art', mass: 0.5 },
+            ];
+
+            function applyLayout(index) {
+                var layout = layouts[index];
+                layoutName.innerHTML = 'Layout: ' + layout.name;
+
+                // Update dots
+                var dots = layoutDotsEl.querySelectorAll('.layout-dot');
+                dots.forEach(function (d, i) {
+                    if (i === index) d.classList.add('active');
+                    else d.classList.remove('active');
+                });
+
+                furnitureItems.forEach(function (item, i) {
+                    var props = layout[item.key];
+                    var el = item.el;
+
+                    // Position properties
+                    if (props.useRight) {
+                        el.style.right = (typeof props.right === 'number' ? props.right + '%' : props.right);
+                        el.style.left = props.left !== undefined ? props.left + '%' : 'auto';
+                    } else {
+                        el.style.left = props.left + '%';
+                        el.style.right = 'auto';
+                    }
+
+                    if (props.bottom !== undefined) el.style.bottom = props.bottom + '%';
+                    if (props.top !== undefined) el.style.top = props.top + '%';
+
+                    // Spring-based rotation with mass factor
+                    var springStiffness = 0.4 + (1 - item.mass / 3) * 0.6;
+                    anime({
+                        targets: el,
+                        rotate: props.rot || 0,
+                        duration: 800 + item.mass * 300,
+                        easing: 'easeOutElastic(' + springStiffness + ', 0.5)',
+                        delay: i * 60,
+                    });
+
+                    // Scale bounce on transition
+                    anime({
+                        targets: el,
+                        scale: [0.96, 1],
+                        duration: 600 + item.mass * 200,
+                        easing: 'easeOutElastic(1, 0.6)',
+                        delay: i * 60,
+                    });
+                });
+
+                // Flash layout name
+                anime({
+                    targets: '.layout-name',
+                    opacity: [0.5, 1],
+                    translateY: [5, 0],
+                    duration: 400,
+                    easing: 'easeOutExpo',
+                });
+            }
+
+            // Entrance
+            anime({
+                targets: '.furniture',
+                opacity: [0, 1],
+                translateY: [30, 0],
+                scale: [0.9, 1],
+                delay: anime.stagger(80),
+                duration: 1000,
+                easing: 'easeOutElastic(1, 0.7)',
+            });
+
+            // SVG floor plan draw-in
+            var fpuLines = document.querySelectorAll('.fpu-line');
+            fpuLines.forEach(function (line) {
+                if (line.getTotalLength) {
+                    var l = line.getTotalLength();
+                    line.style.strokeDasharray = l;
+                    line.style.strokeDashoffset = l;
+                }
+            });
+            anime({
+                targets: '.fpu-line',
+                strokeDashoffset: [anime.setDashoffset, 0],
+                duration: 2000,
+                delay: anime.stagger(100),
+                easing: 'easeInOutCubic',
+            });
+
+            // Scroll handling with smooth interpolation
+            var totalScroll = document.querySelector('.scroll-spacer').offsetHeight - window.innerHeight;
+            var targetPerspX = 5, targetPerspY = -3;
+            var currentPerspX = 5, currentPerspY = -3;
+
+            window.addEventListener('scroll', function () {
+                var scrollY = window.scrollY;
+                var progress = Math.min(scrollY / totalScroll, 1);
+
+                progressThumb.style.height = (progress * 100) + '%';
+
+                var layoutIndex = Math.min(Math.floor(progress * layouts.length), layouts.length - 1);
+                if (layoutIndex !== currentLayout) {
+                    currentLayout = layoutIndex;
+                    applyLayout(layoutIndex);
+                }
+
+                // Perspective shifts
+                targetPerspX = 5 + Math.sin(progress * Math.PI) * 4;
+                targetPerspY = -3 + Math.cos(progress * Math.PI * 2) * 6;
+            });
+
+            // Smooth perspective lerp
+            (function lerpLoop() {
+                currentPerspX += (targetPerspX - currentPerspX) * 0.06;
+                currentPerspY += (targetPerspY - currentPerspY) * 0.06;
+                roomBox.style.transform = 'rotateX(' + currentPerspX + 'deg) rotateY(' + currentPerspY + 'deg)';
+                requestAnimationFrame(lerpLoop);
+            })();
+
+            applyLayout(0);
+        })();
+    </script>
+</body>
+
+</html>
