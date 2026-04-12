@@ -47,4 +47,24 @@
             });
         });
     }
+
+    // Timeline items — IntersectionObserver slide-in animation
+    // Works on all devices (mobile included) unlike GSAP ScrollTrigger
+    const tlItems = document.querySelectorAll('.tl-item');
+    if (tlItems.length > 0 && 'IntersectionObserver' in window) {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    const item = entry.target;
+                    const index = parseInt(item.getAttribute('data-tl') || '1', 10) - 1;
+                    setTimeout(() => {
+                        item.classList.add('visible');
+                    }, index * 150); // staggered 150ms delay
+                    observer.unobserve(item);
+                }
+            });
+        }, { threshold: 0.2 });
+
+        tlItems.forEach(item => observer.observe(item));
+    }
 })();
