@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Noto+Sans+Devanagari:wght@400;600&family=Noto+Sans+Telugu:wght@400;600&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -355,7 +355,7 @@
 
             /* Mobile: CSS animation instead of GSAP */
             .tl-item {
-                margin-bottom: 12px;
+                margin-bottom: 14px;
                 gap: 12px;
                 opacity: 0;
                 transform: translateY(25px);
@@ -382,19 +382,19 @@
             }
 
             .tl-number {
-                font-size: 1.2rem;
-                min-width: 26px;
+                font-size: 1.4rem;
+                min-width: 28px;
             }
 
             .tl-content h3 {
-                font-size: 0.65rem;
+                font-size: 0.75rem;
                 letter-spacing: 0.12em;
-                margin: 0 0 3px;
+                margin: 0 0 4px;
             }
 
             .tl-content p {
-                font-size: 0.7rem;
-                line-height: 1.5;
+                font-size: 0.78rem;
+                line-height: 1.55;
             }
         }
 
@@ -613,23 +613,39 @@
 
         const splashStartTime = Date.now();
 
-        // Greeting toggle Hi -> Hola with slide-fade transition
-        setTimeout(() => {
-            if (splashGreeting) {
-                splashGreeting.style.opacity = '0';
-                splashGreeting.style.transform = 'translateY(-20px)';
+        // Greeting rotation: Hi → Hola → Namaste → Namaskaram
+        const greetings = [
+            { text: 'Hola.', font: 'inherit' },
+            { text: '\u0928\u092E\u0938\u094D\u0924\u0947.', font: "'Noto Sans Devanagari', sans-serif" },
+            { text: '\u0C28\u0C2E\u0C38\u0C4D\u0C15\u0C3E\u0C30\u0C02.', font: "'Noto Sans Telugu', sans-serif" }
+        ];
+        let greetingIndex = 0;
 
-                setTimeout(() => {
-                    splashGreeting.textContent = 'Hola.';
-                    splashGreeting.style.transform = 'translateY(20px)';
+        function showNextGreeting() {
+            if (!splashGreeting || greetingIndex >= greetings.length) return;
+            const g = greetings[greetingIndex];
+            greetingIndex++;
 
-                    requestAnimationFrame(() => {
-                        splashGreeting.style.opacity = '1';
-                        splashGreeting.style.transform = 'translateY(0)';
-                    });
-                }, 400);
-            }
-        }, 1200);
+            splashGreeting.style.opacity = '0';
+            splashGreeting.style.transform = 'translateY(-20px)';
+
+            setTimeout(() => {
+                splashGreeting.textContent = g.text;
+                splashGreeting.style.fontFamily = g.font;
+                splashGreeting.style.transform = 'translateY(20px)';
+
+                requestAnimationFrame(() => {
+                    splashGreeting.style.opacity = '1';
+                    splashGreeting.style.transform = 'translateY(0)';
+                });
+
+                // Schedule next greeting
+                if (greetingIndex < greetings.length) {
+                    setTimeout(showNextGreeting, 1200);
+                }
+            }, 400);
+        }
+        setTimeout(showNextGreeting, 1200);
 
         // Scene
         const scene = new THREE.Scene();
@@ -755,7 +771,7 @@
             },
             (progress) => {
                 if (progress.total > 0) {
-                    const pct = Math.round((progress.loaded / progress.total) * 100);
+                    const pct = Math.min(100, Math.round((progress.loaded / progress.total) * 100));
                     loadingEl.querySelector('p').textContent = 'Loading 3D Environment \u2014 ' + pct + '%';
                     if (splashProgress) splashProgress.textContent = pct + '%';
                 }
