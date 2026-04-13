@@ -548,6 +548,22 @@
 
         gsap.registerPlugin(ScrollTrigger);
 
+        // Timeline item reveals — INDEPENDENT of 3D model loading
+        // Creates its own ScrollTrigger so text slides in even while model downloads
+        const tlTextTimeline = gsap.timeline({
+            scrollTrigger: {
+                trigger: '#modelScrollContainer',
+                start: 'top top',
+                end: 'bottom bottom',
+                scrub: 1
+            }
+        });
+        document.querySelectorAll('.tl-item').forEach((item, i) => {
+            tlTextTimeline.call(() => {
+                item.classList.add('visible');
+            }, null, i * 0.8);
+        });
+
         const canvas = document.getElementById('model-canvas');
         const panel = document.querySelector('.model-panel');
         const loadingEl = document.getElementById('modelLoading');
@@ -696,12 +712,7 @@
                 // Fade scroll hint
                 tl.to(scrollHint, { opacity: 0, duration: 0.3 }, 0);
 
-                // Timeline text parallax: reveal each item at 0%, 25%, 50%, 75%
-                document.querySelectorAll('.tl-item').forEach((item, i) => {
-                    tl.call(() => {
-                        item.classList.add('visible');
-                    }, null, i * 0.8);
-                });
+                // Timeline text reveals are handled by the independent ScrollTrigger above
             },
             (progress) => {
                 if (progress.total > 0) {
