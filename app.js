@@ -46,15 +46,19 @@
                 folder.classList.add('active');
             });
         });
-    }
-    // Timeline items — fallback visibility
-    // GSAP ScrollTrigger (in the inline script) handles the scroll-synced reveal.
-    // This is a safety fallback: if the 3D model fails or GSAP doesn't fire,
-    // show all items after 6 seconds so content is never permanently hidden.
-    const tlItems = document.querySelectorAll('.tl-item');
-    if (tlItems.length > 0) {
-        setTimeout(() => {
-            tlItems.forEach(item => item.classList.add('visible'));
-        }, 6000);
+    }    // Timeline panel — IntersectionObserver for mobile CSS animation
+    // Adds .in-view to the timeline-panel when it scrolls into view,
+    // which triggers CSS @keyframes tlSlideIn with staggered delays per item
+    const timelinePanel = document.querySelector('.timeline-panel');
+    if (timelinePanel && 'IntersectionObserver' in window) {
+        const tlObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('in-view');
+                    tlObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1 });
+        tlObserver.observe(timelinePanel);
     }
 })();

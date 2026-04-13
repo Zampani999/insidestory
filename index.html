@@ -197,6 +197,19 @@
             transform: translateY(0);
         }
 
+        /* Mobile slide-in keyframes (used when GSAP doesn't fire) */
+        @keyframes tlSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(25px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         .tl-number {
             font-family: var(--font-serif);
             font-size: 1.6rem;
@@ -308,10 +321,13 @@
 
             .timeline-panel {
                 width: 100%;
-                height: auto;
-                flex-shrink: 0;
-                padding: 16px 20px 8px;
-                overflow: visible;
+                height: 40vh;
+                padding: 20px 20px 12px;
+                overflow-y: auto;
+                overflow-x: hidden;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
             }
 
             .timeline-panel::after {
@@ -320,12 +336,12 @@
 
             .model-panel {
                 width: 100%;
-                flex: 1;
-                min-height: 0;
+                height: 60vh;
+                flex: none;
             }
 
             .timeline-header {
-                margin-bottom: 10px;
+                margin-bottom: 12px;
             }
 
             .timeline-header h2 {
@@ -337,9 +353,32 @@
                 font-size: 0.6rem;
             }
 
+            /* Mobile: CSS animation instead of GSAP */
             .tl-item {
-                margin-bottom: 8px;
-                gap: 10px;
+                margin-bottom: 12px;
+                gap: 12px;
+                opacity: 0;
+                transform: translateY(25px);
+            }
+
+            .timeline-panel.in-view .tl-item {
+                animation: tlSlideIn 0.5s ease forwards;
+            }
+
+            .timeline-panel.in-view .tl-item[data-tl="1"] {
+                animation-delay: 0s;
+            }
+
+            .timeline-panel.in-view .tl-item[data-tl="2"] {
+                animation-delay: 0.2s;
+            }
+
+            .timeline-panel.in-view .tl-item[data-tl="3"] {
+                animation-delay: 0.4s;
+            }
+
+            .timeline-panel.in-view .tl-item[data-tl="4"] {
+                animation-delay: 0.6s;
             }
 
             .tl-number {
@@ -348,14 +387,14 @@
             }
 
             .tl-content h3 {
-                font-size: 0.6rem;
+                font-size: 0.65rem;
                 letter-spacing: 0.12em;
-                margin: 0 0 2px;
+                margin: 0 0 3px;
             }
 
             .tl-content p {
-                font-size: 0.65rem;
-                line-height: 1.45;
+                font-size: 0.7rem;
+                line-height: 1.5;
             }
         }
 
