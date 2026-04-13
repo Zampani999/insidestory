@@ -47,25 +47,14 @@
             });
         });
     }
-
-    // Timeline items — IntersectionObserver slide-in animation
-    // Observes the timeline panel container, then staggers each item's reveal
-    const timelinePanel = document.querySelector('.timeline-panel');
+    // Timeline items — fallback visibility
+    // GSAP ScrollTrigger (in the inline script) handles the scroll-synced reveal.
+    // This is a safety fallback: if the 3D model fails or GSAP doesn't fire,
+    // show all items after 6 seconds so content is never permanently hidden.
     const tlItems = document.querySelectorAll('.tl-item');
-    if (timelinePanel && tlItems.length > 0 && 'IntersectionObserver' in window) {
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach((entry) => {
-                if (entry.isIntersecting) {
-                    tlItems.forEach((item, i) => {
-                        setTimeout(() => {
-                            item.classList.add('visible');
-                        }, i * 250); // 250ms stagger per item
-                    });
-                    observer.unobserve(entry.target);
-                }
-            });
-        }, { threshold: 0.15 });
-
-        observer.observe(timelinePanel);
+    if (tlItems.length > 0) {
+        setTimeout(() => {
+            tlItems.forEach(item => item.classList.add('visible'));
+        }, 6000);
     }
 })();
